@@ -1,0 +1,412 @@
+/* =====================================================================
+   Sidoma Turizm — VİP Transfer sayfası (vip.css)
+   sb_stil_haritasi() yalnız vip_transfer anahtarlı sayfada, sayfa.css'ten sonra yükler.
+   İçerik tools/icerik/sayfalar/vip-transfer.html'deki grup bloklarıdır (metin eski siteyle birebir;
+   sınıflar sb-vip-*): giriş (görsel + metin), filo (dört araç kartı), hizmetler (altı kart), ardından
+   inc/sayfa.php sb_vip_talep_html() talep bölümü. Kart dili tur sayfasıyla aynı: beyaz yüzey, ince
+   kenarlık, 18 px köşe, maddeler kutucukta kırmızı ✓ (tur.css .sb-tur-liste).
+   Kırılımlar base.css'teki gibi: 768 tablet, 992 masaüstü.
+   ===================================================================== */
+
+/* Bileşen seçicileri .sb-sayfa--vip ile başlar: çekirdeğin blok düzeni (is-layout-flow) ilk ve son çocuğun ve
+   kardeşlerin boşluğunu (0,2,0) özgüllükle yazıyor; kartların iç boşluğu ve ızgara aralığı onu yenmeli.
+   Blocksy'nin dar içerik sütunu (is-layout-constrained) bu sayfada tam genişlik: düzeni gruplar kurar. */
+.sb-sayfa--vip .sb-sayfa__icerik > * {
+  max-inline-size: none;
+}
+
+.sb-sayfa--vip .sb-sayfa__icerik figure {
+  margin: 0;
+}
+
+.sb-sayfa--vip .sb-sayfa__icerik img {
+  display: block;
+  inline-size: 100%;
+  height: auto;
+}
+
+/* Bölüm aralığı: giriş → filo → hizmetler → talep. */
+.sb-sayfa--vip .sb-vip-giris,
+.sb-sayfa--vip .sb-vip-filo,
+.sb-sayfa--vip .sb-vip-hizmetler {
+  margin-block: 0 72px;
+}
+
+@media (min-width: 992px) {
+  .sb-sayfa--vip .sb-vip-giris,
+  .sb-sayfa--vip .sb-vip-filo,
+  .sb-sayfa--vip .sb-vip-hizmetler {
+    margin-block-end: 112px;
+  }
+}
+
+/* Bölüm başlığı (VİP TRANSFER, Hizmetlerimiz): ana sayfadaki "Turlarımız" gibi solda, altında ince çizgi. */
+.sb-sayfa--vip .sb-vip-filo > h2,
+.sb-sayfa--vip .sb-vip-hizmetler > h2 {
+  margin: 0 0 32px;
+  padding-block-end: 16px;
+  border-block-end: 1px solid var(--wp--preset--color--kenarlik);
+  color: var(--wp--preset--color--metin);
+  font-size: var(--wp--preset--font-size--baslik-3);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: var(--sb-satir-baslik);
+}
+
+/* ---------- Giriş: görsel solda, metin sağda (canlı sitenin düzeni) ---------- */
+.sb-sayfa--vip .sb-vip-giris {
+  display: grid;
+  gap: 28px;
+  align-items: center;
+}
+
+/* Izgara çocukları: blok düzeninin kardeş boşluğu (margin-block-start) yerine ızgara aralığı. */
+.sb-sayfa--vip :is(.sb-vip-giris, .sb-vip-araclar, .sb-vip-hizmet-izgara) > * {
+  margin-block: 0;
+}
+
+.sb-sayfa--vip .sb-vip-giris > figure img {
+  border-radius: var(--sb-kart-radius);
+}
+
+/* KURUMSAL: bölüm etiketi gibi küçük, aralıklı büyük harf; asıl başlık altındaki satır. */
+.sb-sayfa--vip .sb-vip-giris__metin > h2 {
+  margin: 0 0 14px;
+  color: var(--wp--preset--color--aksan-koyu);
+  font-size: var(--wp--preset--font-size--kucuk);
+  font-weight: 600;
+  letter-spacing: var(--sb-harf-etiket);
+  line-height: var(--sb-satir-arayuz);
+}
+
+.sb-sayfa--vip .sb-vip-giris__metin > h3 {
+  margin: 0 0 18px;
+  color: var(--wp--preset--color--metin);
+  font-size: var(--wp--preset--font-size--baslik-3);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: var(--sb-satir-baslik);
+  text-wrap: balance;
+}
+
+/* Dönen sözcük (assets/js/vip-baslik.js; canlı sitedeki daktilo başlık): koyu kırmızı, sonunda yanıp sönen imleç.
+   Kap en uzun sözcük genişliğinde (JS min-width), sözcük solda. */
+.sb-sayfa--vip .sb-vip-donen {
+  display: inline-block;
+  color: var(--wp--preset--color--aksan-koyu);
+  text-align: start;
+}
+
+.sb-sayfa--vip .sb-vip-donen__yazi::after {
+  content: "";
+  display: inline-block;
+  inline-size: 2px;
+  block-size: 0.9em;
+  margin-inline-start: 2px;
+  vertical-align: -0.08em;
+  background: currentcolor;
+  animation: sb-vip-imlec 1s steps(1) infinite;
+}
+
+@keyframes sb-vip-imlec {
+  50% {
+    opacity: 0;
+  }
+}
+
+.sb-sayfa--vip .sb-vip-giris__metin > p {
+  max-inline-size: 52ch;
+  margin: 0;
+  font-size: var(--wp--preset--font-size--orta);
+  line-height: 1.7;
+}
+
+.sb-sayfa--vip .sb-vip-giris__metin strong {
+  color: var(--wp--preset--color--metin);
+  font-weight: 600;
+}
+
+@media (min-width: 992px) {
+  .sb-sayfa--vip .sb-vip-giris {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: 64px;
+  }
+}
+
+/* ---------- Filo: araç kartları (≥ 992 px iki sütun) ---------- */
+.sb-sayfa--vip .sb-vip-araclar {
+  display: grid;
+  gap: 24px;
+}
+
+@media (min-width: 992px) {
+  .sb-sayfa--vip .sb-vip-araclar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 32px;
+  }
+}
+
+/* Kart (taşmayı kırpmaz; görselin üst köşeleri kendisi yuvarlanır): büyük görsel kenardan kenara üstte, küçük üç görsel onun alt kenarına biner, sonra ad, maddeler ve
+   düğme (kartın dibinde; yan yana kartlarda düğmeler aynı hizada). Kaynak sırası ad → görsel → galeri →
+   liste → düğme; görsel ve galeri yalnız görünümde öne alınır (odaklanan öğe yalnız düğme, sırası değişmez). */
+.sb-sayfa--vip .sb-vip-arac {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--wp--preset--color--kenarlik);
+  border-radius: var(--sb-kart-radius);
+  background: var(--wp--preset--color--yuzey);
+}
+
+.sb-sayfa--vip .sb-vip-arac > * {
+  margin-inline: 24px;
+}
+
+.sb-sayfa--vip .sb-vip-arac > figure {
+  order: -2;
+  margin: 0;
+}
+
+.sb-sayfa--vip .sb-vip-arac > figure img,
+.sb-sayfa--vip .sb-vip-hizmet > figure img {
+  border-radius: calc(var(--sb-kart-radius) - 1px) calc(var(--sb-kart-radius) - 1px) 0 0;
+}
+
+.sb-sayfa--vip .sb-vip-arac > figure img {
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.sb-sayfa--vip .sb-vip-arac > .sb-vip-arac__galeri {
+  order: -1;
+}
+
+.sb-sayfa--vip .sb-vip-arac > h3 {
+  margin-block: 22px 16px;
+  color: var(--wp--preset--color--metin);
+  font-size: var(--wp--preset--font-size--baslik-4);
+  font-weight: 500;
+  line-height: var(--sb-satir-baslik);
+}
+
+/* Galeri: çekirdeğin sütun düzeni (flex, 782 px altında alt alta) yerine sabit üçlü ızgara. Kaynak görseller
+   150 px kare küçük boyut; 120 px'i aşmaz, büyütülüp bulanıklaşmaz. */
+.sb-sayfa--vip .sb-vip-arac .wp-block-columns.sb-vip-arac__galeri {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 120px));
+  gap: 10px;
+  margin-block: -44px 0;
+}
+
+.sb-sayfa--vip .sb-vip-arac__galeri > .wp-block-column {
+  min-inline-size: 0;
+  margin: 0;
+}
+
+.sb-sayfa--vip .sb-vip-arac__galeri img {
+  aspect-ratio: 1;
+  object-fit: cover;
+  border: 3px solid var(--wp--preset--color--yuzey);
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgb(29 31 36 / 0.14);
+}
+
+/* Maddeler: tur sayfasının "Fiyata dahil olanlar" kutucukları. İlk ikisi (yolcu ve bavul kapasitesi) açık
+   kırmızı zeminde koyu metin; diğerleri beyaz kutuda kırmızı ✓. */
+.sb-sayfa--vip .sb-vip-arac > ul {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-block: 0 24px;
+  padding: 0;
+  list-style: none;
+  font-size: var(--wp--preset--font-size--kucuk);
+  line-height: var(--sb-satir-arayuz);
+}
+
+.sb-sayfa--vip .sb-vip-arac > ul li {
+  position: relative;
+  margin: 0;
+  padding: 11px 14px 11px 36px;
+  border: 1px solid var(--wp--preset--color--kenarlik);
+  border-radius: 10px;
+}
+
+.sb-sayfa--vip .sb-vip-arac > ul li::before {
+  content: "✓" / "";
+  position: absolute;
+  inset-inline-start: 14px;
+  color: var(--wp--preset--color--aksan);
+  font-weight: 800;
+}
+
+.sb-sayfa--vip .sb-vip-arac > ul li:nth-child(-n + 2) {
+  border-color: transparent;
+  background: var(--wp--preset--color--aksan-acik);
+  color: var(--wp--preset--color--metin);
+  font-weight: 600;
+}
+
+.sb-sayfa--vip .sb-vip-arac > ul li:nth-child(-n + 2)::before {
+  color: var(--wp--preset--color--aksan-koyu);
+}
+
+@media (max-width: 479.98px) {
+  .sb-sayfa--vip .sb-vip-arac > ul {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Düğme (İletişime Geçin, WhatsApp bağlantısı): .sb-btn--cerceve ile aynı görünüm. */
+.sb-sayfa--vip .sb-vip-arac > .wp-block-buttons {
+  margin-block: auto 24px;
+}
+
+.sb-sayfa--vip .wp-block-button__link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-block-size: var(--sb-dokunma);
+  padding: 0 28px;
+  border: 1px solid var(--wp--preset--color--aksan);
+  border-radius: var(--theme-button-border-radius);
+  background: transparent;
+  color: var(--wp--preset--color--metin);
+  font-size: var(--wp--preset--font-size--kucuk);
+  font-weight: 600;
+  letter-spacing: var(--sb-harf-sekme);
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: background-color var(--sb-sure-hizli) ease, color var(--sb-sure-hizli) ease;
+}
+
+.sb-sayfa--vip .wp-block-button__link:is(:hover, :focus-visible) {
+  background: var(--wp--preset--color--aksan);
+  color: var(--wp--preset--color--aksan-uzeri);
+}
+
+.sb-sayfa--vip .wp-block-button__link:active {
+  transform: translateY(1px);
+}
+
+@media (min-width: 992px) {
+  .sb-sayfa--vip .sb-vip-arac > * {
+    margin-inline: 28px;
+  }
+
+  .sb-sayfa--vip .sb-vip-arac .wp-block-columns.sb-vip-arac__galeri {
+    margin-block-start: -52px;
+  }
+}
+
+/* ---------- Hizmetler: altı kart ----------
+   Kaynak sırası canlı sitenin sütun sırası (Rize, Ordu-Giresun | Trabzon, Tiflis | Batum, Şehirlerarası);
+   ≥ 992 px iki satırlı ızgara sütun sütun dolar, görünüm canlıdakiyle aynı olur. Dar ekranda kaynak sırası. */
+.sb-sayfa--vip .sb-vip-hizmet-izgara {
+  display: grid;
+  gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .sb-sayfa--vip .sb-vip-hizmet-izgara {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(3, auto);
+    grid-auto-flow: column;
+  }
+}
+
+@media (min-width: 992px) {
+  .sb-sayfa--vip .sb-vip-hizmet-izgara {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: repeat(2, auto);
+    gap: 32px 28px;
+  }
+}
+
+.sb-sayfa--vip .sb-vip-hizmet {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--wp--preset--color--kenarlik);
+  border-radius: var(--sb-kart-radius);
+  background: var(--wp--preset--color--yuzey);
+}
+
+.sb-sayfa--vip .sb-vip-hizmet > * {
+  margin-inline: 24px;
+}
+
+.sb-sayfa--vip .sb-vip-hizmet > figure {
+  order: -1;
+  margin: 0;
+}
+
+.sb-sayfa--vip .sb-vip-hizmet > figure img {
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+}
+
+.sb-sayfa--vip .sb-vip-hizmet > h3 {
+  margin-block: 22px 10px;
+  color: var(--wp--preset--color--metin);
+  font-size: var(--wp--preset--font-size--normal);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: var(--sb-satir-arayuz);
+}
+
+.sb-sayfa--vip .sb-vip-hizmet > p {
+  margin-block: 0 26px;
+  font-size: var(--wp--preset--font-size--kucuk);
+  line-height: 1.75;
+}
+
+.sb-sayfa--vip .sb-vip-hizmet strong {
+  color: var(--wp--preset--color--metin);
+  font-weight: 600;
+}
+
+/* ---------- Talep bölümü (inc/sayfa.php sb_vip_talep_html) ----------
+   ≥ 992 px iki sütun: solda açık kırmızı yan panelde başlık ve WhatsApp düğmesi (tur sayfasının "Sorunuz mu
+   var?" kartı; form boyunca kaydırırken sabit), sağda İletişim formuyla aynı çerçeveli form kartı. Alan ve düğme
+   stilleri sayfa.css'teki Fluent Forms kurallarından. Bölüm aralığı hizmetlerin alt boşluğundan gelir. */
+.sb-sayfa--vip .sb-vip-talep {
+  display: grid;
+  gap: 24px;
+}
+
+.sb-sayfa--vip .sb-vip-talep__yan {
+  padding: 32px 28px;
+  border-radius: var(--sb-kart-radius);
+  background: var(--wp--preset--color--aksan-acik);
+}
+
+.sb-sayfa--vip .sb-vip-talep__baslik {
+  margin: 0 0 20px;
+  color: var(--wp--preset--color--metin);
+  font-size: var(--wp--preset--font-size--baslik-3);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: var(--sb-satir-baslik);
+}
+
+.sb-sayfa--vip .sb-vip-talep__wa {
+  margin: 0;
+}
+
+.sb-sayfa--vip .sb-vip-talep .sb-vip-talep__form {
+  max-inline-size: none;
+}
+
+@media (min-width: 992px) {
+  .sb-sayfa--vip .sb-vip-talep {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: 32px;
+    align-items: start;
+  }
+
+  .sb-sayfa--vip .sb-vip-talep__yan {
+    position: sticky;
+    inset-block-start: 120px;
+    padding: 40px;
+  }
+}

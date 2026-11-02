@@ -1,0 +1,1089 @@
+/*
+ * Mağaza görünümü (Görev 8; Plan 2 Görev 6): ürün ızgarası, tur olmayan ürünün kartı, rozetler, tur kartı
+ * (template-parts/tur/kart.php; taslağın .tur ve .s-urun kartları), arşiv bandı, tema çipleri, "N tur",
+ * boş durumlar, sayfalama, renk seçicisi etiketi, kaydırmalı ürün şeridi. Renkler theme.json paleti
+ * (--wp--preset--color--<ad>). Kırılımlar (min-width): 640 / 768 / 992 / 1280. Mobil önce yazılır.
+ * Kontrast (kontrast.mjs çiftleri): kırmızı küçük metin yalnız beyaz (yuzey) ya da sayfa zemininde;
+ * açık kırmızı rozet zemininde metin koyu kırmızı.
+ */
+
+/* ---------- Ürün ızgarası (arşiv, ana sayfa, ilgili ürünler) ---------- */
+ul.products {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 40px 20px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+ul.products::before,
+ul.products::after {
+	content: none;
+}
+
+@media (min-width: 992px) {
+	ul.products.columns-3 {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+
+	ul.products.columns-4 {
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+	}
+}
+
+/* ---------- Tur olmayan ürünün kartı (content-product.php; Plan 4'e kadar ödeme fikstürleri) ----------
+   Aksiyon barı ve rozetler DOM'da başlık ve fiyattan sonra gelir (okuma ve sekme
+   sırası: ad → fiyat → rozet → aksiyon); ızgaranın aynı "medya" alanına yerleşerek
+   görselin üstüne biner. */
+ul.products li.sb-kart {
+	position: relative;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	grid-template-areas:
+		"medya"
+		"ad"
+		"fiyat";
+	align-content: start;
+	width: auto;
+	margin: 0;
+	padding: 0;
+	float: none;
+}
+
+.sb-kart__medya {
+	grid-area: medya;
+	position: relative;
+	aspect-ratio: 8 / 9;
+	overflow: hidden;
+	border-radius: var(--sb-kart-radius, 16px);
+	background: var(--wp--preset--color--yuzey, #f9f9f9);
+}
+
+.sb-kart__gorsel {
+	position: absolute;
+	inset: 0;
+	display: block;
+}
+
+.sb-kart__gorsel img {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	object-fit: cover;
+}
+
+.sb-kart__ad {
+	grid-area: ad;
+	margin: 15px 0 0;
+	font-size: 16px;
+	font-weight: 400;
+	line-height: 1.4;
+	letter-spacing: 0;
+	text-transform: none;
+}
+
+/* Bağımsız bağlantı: dokunma alanı 44 px (spec §4.1), görünen satır aynı. */
+.sb-kart__ad a {
+	display: block;
+	margin: -11px 0;
+	padding: 11px 0;
+	color: var(--wp--preset--color--metin, #333333);
+	text-decoration: none;
+}
+
+.sb-kart__ad a:hover {
+	color: var(--wp--preset--color--aksan-koyu, #7d6e55);
+}
+
+.sb-kart .price {
+	grid-area: fiyat;
+	display: block;
+	margin: 5px 0 0;
+	font-size: 18px;
+	line-height: 1.4;
+	color: var(--wp--preset--color--metin-ikincil, #6a6a6a);
+}
+
+.sb-kart__rozetler {
+	grid-area: medya;
+	align-self: start;
+	justify-self: start;
+	z-index: 2;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 6px;
+	margin: 10px;
+}
+
+/* Aksiyon barı: hover'a ek olarak klavye odağında ve dokunmatik ekranda görünür
+   (Mober'in yalnız hover'da görünen aksiyonları kopyalanmaz, spec §4.5). */
+.sb-kart__aksiyonlar {
+	grid-area: medya;
+	align-self: end;
+	z-index: 2;
+	display: flex;
+	min-height: 50px;
+	border-radius: 0 0 var(--sb-kart-radius, 16px) var(--sb-kart-radius, 16px);
+	overflow: hidden;
+	background: var(--wp--preset--color--koyu-dolgu, #4e4e4e);
+	opacity: 0;
+	transform: translateY(10px);
+	transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.sb-kart:hover .sb-kart__aksiyonlar,
+.sb-kart:focus-within .sb-kart__aksiyonlar {
+	opacity: 1;
+	transform: none;
+}
+
+.sb-kart__aksiyonlar > .button,
+.sb-kart__aksiyonlar > button {
+	display: inline-flex;
+	flex: 1 1 auto;
+	align-items: center;
+	justify-content: center;
+	min-width: 44px;
+	min-height: 50px;
+	margin: 0;
+	padding: 0 16px;
+	font-size: 14px;
+	line-height: 1.4;
+	letter-spacing: 0.11em;
+	text-transform: uppercase;
+	text-decoration: none;
+	color: #ffffff;
+	background: transparent;
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
+}
+
+.sb-kart__aksiyonlar > * + * {
+	border-left: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.sb-kart__aksiyonlar > .button:hover,
+.sb-kart__aksiyonlar > .button:focus-visible,
+.sb-kart__aksiyonlar > button:hover,
+.sb-kart__aksiyonlar > button:focus-visible {
+	color: var(--wp--preset--color--aksan-uzeri, #333333);
+	background: var(--wp--preset--color--aksan, #c3b8a5);
+}
+
+.sb-kart__aksiyonlar > .button:focus-visible,
+.sb-kart__aksiyonlar > button:focus-visible {
+	outline: 2px solid #ffffff;
+	outline-offset: -4px;
+}
+
+/* AJAX eklemeden sonra WC'nin "Sepeti görüntüle" bağlantısı: mini sepet açılıyor (Görev 6). */
+.sb-kart__aksiyonlar .added_to_cart {
+	display: none;
+}
+
+@media (hover: none) {
+	.sb-kart__aksiyonlar {
+		grid-area: auto;
+		grid-row: 4;
+		opacity: 1;
+		transform: none;
+	}
+
+	/* Dokunmatikte düğme fiyatın altında, ayrı bir düğme (owner 2026-10-01). */
+	.sb-kart__aksiyonlar {
+		gap: 8px;
+		margin-top: 10px;
+		overflow: visible;
+		border-radius: 0;
+		background: none;
+	}
+
+	.sb-kart__aksiyonlar > * + * {
+		border-left: 0;
+	}
+
+	.sb-kart__aksiyonlar > .button {
+		border-radius: 12px;
+		background: var(--wp--preset--color--koyu-dolgu, #4e4e4e);
+	}
+
+}
+
+/* Mobil kart düzeni (owner 2026-10-01): yan yana kartlarda fiyat ve düğme aynı hizada (ad satırı esner;
+   satırdaki kartlar zaten eşit boyda), "Sepete Ekle" tek satır (tıklanan metin iki satıra kaymaz,
+   hallmark kapı 49). Masaüstü değişmez. */
+@media (max-width: 767px) {
+	ul.products li.sb-kart {
+		grid-template-rows: auto 1fr auto auto;
+		align-content: stretch;
+	}
+
+	.sb-kart__aksiyonlar > .button,
+	.sb-kart__aksiyonlar > button {
+		padding: 0 8px;
+		font-size: 12px;
+		letter-spacing: 0.06em;
+		white-space: nowrap;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.sb-kart__aksiyonlar {
+		transition: none;
+	}
+}
+
+/* ---------- Rozetler (taslak .rozet: 11 px, 700, .1em, köşe 6 px) ----------
+   Kaynak metin normal yazımla, büyük harf CSS ile. Tip: günübirlik açık kırmızı üstünde koyu kırmızı
+   (6,0:1), konaklamalı açık mavi üstünde mavi (6,0:1). Durum: son koltuk hap renkleri (5,4:1), tarih
+   yakında ve dolu beyaz üstünde mürekkep. Süzgeçten gelen rozet (indirim) beyaz üstünde mürekkep. */
+.sb-rozet {
+	display: inline-block;
+	padding: 4px 9px;
+	border-radius: 6px;
+	font-size: 11px;
+	font-weight: 700;
+	line-height: 1.4;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--wp--preset--color--metin);
+	background: var(--wp--preset--color--yuzey);
+}
+
+.sb-rozet--gunubirlik {
+	color: var(--wp--preset--color--aksan-koyu);
+	background: var(--wp--preset--color--aksan-acik);
+}
+
+.sb-rozet--paket {
+	color: var(--wp--preset--color--mavi);
+	background: var(--wp--preset--color--mavi-acik);
+}
+
+.sb-rozet--son-koltuklar {
+	color: var(--wp--preset--color--hap-metin);
+	background: var(--wp--preset--color--hap);
+}
+
+/* ---------- Tur kartı: ızgara (taslak .tur) ----------
+   Beyaz kart, 1 px çizgi, 18 px köşe; görsel 4:3 (sb-tur-kart 800×600); gövde 16/18/18 px; ad 17 px 700;
+   alt satırda solda çıkış özeti ve kalkış saati (13 px gri), sağda fiyat (24 px 800 kırmızı). Kartın tek
+   bağlantısı başlıkta; ::after kartın tamamını kaplar, kart her yerinden tıklanır. Kartlar satırda eşit
+   boyda (li esner), fiyat satırı alta yaslanır. */
+ul.products li.sb-tur-oge {
+	display: flex;
+	width: auto;
+	margin: 0;
+	padding: 0;
+	float: none;
+}
+
+.sb-tur-kart {
+	position: relative;
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: column;
+	min-width: 0;
+	border: 1px solid var(--wp--preset--color--kenarlik);
+	border-radius: var(--sb-kart-radius, 18px);
+	background: var(--wp--preset--color--yuzey);
+	color: var(--wp--preset--color--metin);
+	transition: box-shadow var(--sb-sure, 0.3s) ease;
+}
+
+.sb-tur-kart:hover {
+	box-shadow: 0 10px 28px rgba(29, 31, 36, 0.1);
+}
+
+/* Klavye odağı: başlık bağlantısının halkasına ek olarak kartın çevresi (kart her yerinden tıklanıyor). */
+.sb-tur-kart:has(.sb-tur-kart__ad a:focus-visible) {
+	box-shadow: 0 0 0 2px var(--wp--preset--color--metin);
+}
+
+.sb-tur-kart__medya {
+	position: relative;
+	aspect-ratio: 4 / 3;
+	overflow: hidden;
+	border-radius: calc(var(--sb-kart-radius, 18px) - 1px) calc(var(--sb-kart-radius, 18px) - 1px) 0 0;
+	background: var(--wp--preset--color--yuzey-2);
+}
+
+.sb-tur-kart__gorsel {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	object-fit: cover;
+	transition: transform var(--sb-sure-gorsel, 0.5s) ease;
+}
+
+.sb-tur-kart:hover .sb-tur-kart__gorsel {
+	transform: scale(1.03);
+}
+
+.sb-tur-kart__rozetler {
+	position: absolute;
+	top: 12px;
+	right: 12px;
+	left: 12px;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.sb-tur-kart__rozetler .sb-rozet {
+	box-shadow: 0 1px 4px rgba(29, 31, 36, 0.16);
+}
+
+.sb-tur-kart__govde {
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: column;
+	min-width: 0;
+	padding: 16px 18px 18px;
+}
+
+.sb-tur-kart__ust {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 4px 10px;
+	margin-bottom: 8px;
+}
+
+.sb-tur-kart__sure {
+	font-size: 13px;
+	line-height: 1.4;
+	white-space: nowrap;
+	color: var(--wp--preset--color--metin-ikincil);
+}
+
+.sb-tur-kart__ad {
+	margin: 0;
+	font-size: 17px;
+	font-weight: 700;
+	line-height: 1.3;
+	letter-spacing: 0;
+	text-transform: none;
+	overflow-wrap: anywhere;
+	color: var(--wp--preset--color--metin);
+}
+
+.sb-tur-kart__ad a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.sb-tur-kart__ad a::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	/* Dolgu kutusunu kaplar (1 px çerçevenin içi): köşe, kartın görünen köşesiyle aynı yay. */
+	border-radius: calc(var(--sb-kart-radius, 18px) - 1px);
+}
+
+.sb-tur-kart:hover .sb-tur-kart__ad {
+	color: var(--wp--preset--color--aksan-koyu);
+}
+
+.sb-tur-kart__alt {
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 12px;
+	margin-top: auto;
+	padding-top: 12px;
+}
+
+.sb-tur-kart__cikis {
+	min-width: 0;
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.4;
+	color: var(--wp--preset--color--metin-ikincil);
+}
+
+.sb-tur-kart__fiyat {
+	flex: 0 0 auto;
+	margin: 0 0 0 auto;
+	line-height: 1.1;
+	text-align: right;
+}
+
+.sb-tur-kart__tutar {
+	display: block;
+	font-size: 24px;
+	font-weight: 800;
+	letter-spacing: -0.01em;
+	white-space: nowrap;
+	color: var(--wp--preset--color--aksan);
+}
+
+.sb-tur-kart__fiyat--sor {
+	flex-shrink: 1;
+	max-width: 9.5em;
+	font-size: 14px;
+	font-weight: 700;
+	line-height: 1.3;
+	color: var(--wp--preset--color--aksan-koyu);
+}
+
+/* ---------- Tur kartı: şerit (taslak D .f-card; ana sayfa şeridi ve benzer turlar) ----------
+   "Yeni bento" (ana sayfa düzeltme turu 2): beyaz kart, 12 px dolgu, solda 76 px kare görsel (sb-kare, köşe 12 px);
+   yanında üst satır tip rozeti + süre, ad en çok 2 satır, çıkış tek satır (konum simgesi, taşan "…"). Kartın alt
+   satırında (ince çizgiyle ayrık) solda fiyat ya da "Fiyat için bize yazın", karşısında durum ("Tarihler
+   yakında", "Son N koltuk" …; takvim simgesi, sığmazsa "…"); durum görselin üstünde değil. Kart ≤ 150 px
+   (anasayfa.mjs). Rozet renkleri sitedeki gibi: günübirlik kırmızı, konaklamalı mavi. */
+.sb-tur-kart--serit {
+	display: grid;
+	grid-template-areas:
+		"medya govde"
+		"alt alt";
+	grid-template-columns: 76px minmax(0, 1fr);
+	grid-template-rows: 1fr auto;
+	column-gap: 12px;
+	padding: 12px;
+	border: 0;
+	box-shadow: 0 1px 2px rgba(70, 50, 30, 0.05);
+}
+
+.sb-tur-kart--serit .sb-tur-kart__medya {
+	grid-area: medya;
+	align-self: start;
+	width: 76px;
+	aspect-ratio: 1;
+	border-radius: 12px;
+}
+
+.sb-tur-kart--serit .sb-tur-kart__rozetler {
+	top: 4px;
+	right: 4px;
+	left: 4px;
+	align-items: flex-start;
+	gap: 3px;
+}
+
+.sb-tur-kart--serit .sb-tur-kart__rozetler .sb-rozet {
+	padding: 2px 4px;
+	border-radius: 5px;
+	letter-spacing: 0;
+	line-height: 1.2;
+	text-transform: none;
+}
+
+.sb-tur-kart--serit .sb-tur-kart__govde {
+	grid-area: govde;
+	gap: 4px;
+	padding: 0;
+}
+
+.sb-tur-kart--serit .sb-tur-kart__ust {
+	flex-wrap: nowrap;
+	gap: 6px;
+	margin: 0;
+}
+
+.sb-tur-kart--serit .sb-tur-kart__ust .sb-rozet {
+	flex: 0 0 auto;
+	padding: 3px 7px;
+	line-height: 1.2;
+	letter-spacing: 0.035em;
+}
+
+.sb-tur-kart--serit .sb-tur-kart__sure {
+	min-width: 0;
+	overflow: hidden;
+	font-size: 12px;
+	text-overflow: ellipsis;
+}
+
+.sb-tur-kart--serit .sb-tur-kart__ad {
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1.25;
+}
+
+/* İki satır sınırı bağlantının kendisinde: başlıkta (h3) overflow, bağlantının odak halkasını kırpardı (kalite.mjs
+   odak turu). ::after kartı kaplamaya devam eder (kapsayan blok kart; bağlantının overflow'u onu kırpmaz). */
+.sb-tur-kart--serit .sb-tur-kart__ad a {
+	display: -webkit-box;
+	overflow: hidden;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	line-clamp: 2;
+}
+
+.sb-tur-kart--serit .sb-tur-kart__cikis {
+	margin: 0;
+	overflow: hidden;
+	font-size: 12.5px;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.sb-tur-kart--serit :is(.sb-tur-kart__cikis, .sb-tur-kart__durum) .sb-ikon {
+	display: inline-block;
+	width: 13px;
+	height: 13px;
+	margin-right: 4px;
+	vertical-align: -2px;
+}
+
+.sb-tur-kart--serit .sb-tur-kart__alt {
+	display: flex;
+	grid-area: alt;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	margin: 10px 0 0;
+	padding: 9px 0 0;
+	border-top: 1px solid var(--wp--preset--color--kenarlik);
+	white-space: nowrap;
+}
+
+.sb-tur-kart--serit .sb-tur-kart__fiyat {
+	flex: 0 0 auto;
+	margin: 0;
+	line-height: 1.3;
+	text-align: left;
+}
+
+.sb-tur-kart--serit .sb-tur-kart__tutar {
+	display: inline;
+}
+
+.sb-tur-kart--serit .sb-tur-kart__tutar {
+	margin-right: 2px;
+	color: var(--wp--preset--color--metin);
+	font-size: 16px;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+}
+
+.sb-tur-kart--serit .sb-tur-kart__fiyat--sor {
+	max-width: none;
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.sb-tur-kart__durum {
+	flex: 0 1 auto;
+	min-width: 0;
+	margin: 0;
+	overflow: hidden;
+	color: var(--wp--preset--color--metin-ikincil);
+	font-size: 12.5px;
+	line-height: 1.3;
+	text-overflow: ellipsis;
+}
+
+/* Son koltuk: hap etiketinin metin rengi (beyazda ≥ 4,5:1), aciliyet görünsün. */
+.sb-tur-kart__durum--son-koltuklar {
+	color: var(--wp--preset--color--hap-metin);
+	font-weight: 600;
+}
+
+/* ---------- Tur kartı şeridi (taslak D .featured): ana sayfanın öne çıkan turları (kalktı, ana sayfa turu 5)
+   ve tur sayfasının benzer turları (template-parts/tur/detay.php, kullanımda). Üstte başlık (19 px) ve
+   (taşınca) oklar; altında ayrı beyaz kartlar, 12 px aralıkla yatay kayar; oklar serit.js. Görünen kart sayısı
+   --sb-serit-adet: mobilde bir kart + komşunun ucu, 768'de 2,3, 1024'te 3, 1280'den itibaren 4 (tip rozeti + süre ve
+   fiyat + durum satırları sığsın). Liste dolgusu kartın odak gölgesi (2 px) kırpılmasın diye; eksi kenar boşluğu
+   kartları kenarla hizalar. ---------- */
+.sb-one-cikan {
+	--sb-serit-adet: 1.15;
+	display: flex;
+	flex-direction: column;
+	margin-top: 16px;
+}
+
+.sb-one-cikan__bas {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	min-height: 44px;
+	margin-bottom: 8px;
+}
+
+.sb-one-cikan__yazi {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 2px 14px;
+	min-width: 0;
+}
+
+.sb-one-cikan__baslik {
+	margin: 0;
+	color: var(--wp--preset--color--metin);
+	font-size: 19px;
+	font-weight: 600;
+	line-height: 1.3;
+	letter-spacing: -0.01em;
+}
+
+.sb-one-cikan__liste {
+	display: flex;
+	gap: 12px;
+	min-width: 0;
+	margin: -2px;
+	padding: 2px;
+	list-style: none;
+	overflow-x: auto;
+	overscroll-behavior-x: contain;
+	scroll-snap-type: x mandatory;
+	scroll-padding-inline: 2px;
+	scrollbar-width: none;
+}
+
+.sb-one-cikan__liste::-webkit-scrollbar {
+	display: none;
+}
+
+/* min-width 0: tek satırlık çıkış (nowrap) kartı genişletmesin, kartlar eşit genişlikte kalsın. */
+.sb-one-cikan__oge {
+	display: flex;
+	flex: 0 0 calc((100% - (var(--sb-serit-adet) - 1) * 12px) / var(--sb-serit-adet));
+	min-width: 0;
+	scroll-snap-align: start;
+}
+
+.sb-one-cikan__oge > .sb-tur-kart {
+	flex: 1 1 auto;
+}
+
+/* Kaydırma kabı odağı kırpardı: kart başlığının halkası içeride (magaza.css şerit dersi). */
+.sb-one-cikan__liste :is(a, button):focus-visible {
+	outline-offset: -2px;
+}
+
+@media (min-width: 768px) {
+	.sb-one-cikan {
+		--sb-serit-adet: 2.3;
+	}
+}
+
+@media (min-width: 1024px) {
+	.sb-one-cikan {
+		--sb-serit-adet: 3;
+	}
+}
+
+@media (min-width: 1280px) {
+	.sb-one-cikan {
+		--sb-serit-adet: 4;
+	}
+}
+
+.sb-one-cikan__oklar {
+	display: flex;
+	flex: 0 0 auto;
+	gap: 8px;
+}
+
+.sb-one-cikan__oklar[hidden] {
+	display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.sb-tur-kart,
+	.sb-tur-kart__gorsel {
+		transition: none;
+	}
+
+	.sb-tur-kart:hover .sb-tur-kart__gorsel {
+		transform: none;
+	}
+}
+
+/* ---------- Arşiv bandı (layout.css .sb-bant): taslağın blokları gibi kenarlardan 12 px içeride, 18 px köşe ---------- */
+.sb-arsiv > .sb-bant {
+	margin: 12px 12px 28px;
+	border-radius: var(--sb-kart-radius, 18px);
+}
+
+.sb-arsiv .sb-bant__baslik {
+	font-weight: 800;
+	letter-spacing: -0.02em;
+}
+
+@media (min-width: 992px) {
+	.sb-arsiv > .sb-bant {
+		margin-bottom: 36px;
+	}
+}
+
+/* ---------- Arşiv gövdesi: tema çipleri, "N tur", 3/2/1 sütun ızgara (taslak .turlar, aralık 18 px) ---------- */
+.sb-arsiv__govde {
+	padding-bottom: 80px;
+}
+
+.sb-arsiv__govde ul.products {
+	grid-template-columns: minmax(0, 1fr);
+	gap: 18px;
+}
+
+@media (min-width: 640px) {
+	.sb-arsiv__govde ul.products {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (min-width: 992px) {
+	.sb-arsiv__govde ul.products {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+}
+
+.sb-arsiv__sayi {
+	margin: 0 0 16px;
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1.4;
+	color: var(--wp--preset--color--metin-ikincil);
+}
+
+/* Tema çipleri (taslak .cipler): hap düğmeler, 44 px; seçili tema koyu dolgu. Satır taslaktaki gibi alta
+   kırılır. Yatay kaydırma denendi: Chromium kısmen görünen çipe odaklanınca kabı kaydırmıyor, odaklı çip
+   kırpık kalıyordu (kalite.mjs 390 px; serit.js'in focusin düzeltmesi JS ister). */
+.sb-cipler {
+	margin: 0 0 20px;
+}
+
+.sb-cipler__liste {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 9px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.sb-cip {
+	display: inline-flex;
+	align-items: center;
+	min-height: var(--sb-dokunma, 44px);
+	padding: 0 18px;
+	border: 1px solid var(--wp--preset--color--kenarlik);
+	border-radius: 999px;
+	font-size: 14.5px;
+	font-weight: 600;
+	line-height: 1.2;
+	white-space: nowrap;
+	text-decoration: none;
+	color: var(--wp--preset--color--metin);
+	background: var(--wp--preset--color--yuzey);
+	transition: border-color var(--sb-sure-hizli, 0.2s);
+}
+
+.sb-cip:hover {
+	border-color: var(--wp--preset--color--aksan);
+}
+
+.sb-cip[aria-current="page"] {
+	border-color: var(--wp--preset--color--metin);
+	color: var(--wp--preset--color--yuzey);
+	background: var(--wp--preset--color--metin);
+}
+
+/* ---------- Boş durumlar (her biri kendi mesajıyla; yeşil onay ikonu yok, spec §4.5) ---------- */
+.sb-arsiv__bos {
+	max-width: 560px;
+	margin: 20px auto 60px;
+	text-align: center;
+}
+
+.sb-arsiv__bos-baslik {
+	margin: 0 0 10px;
+	font-size: clamp(22px, 3vw, 28px);
+	font-weight: 800;
+	line-height: 1.2;
+	letter-spacing: -0.02em;
+	color: var(--wp--preset--color--metin);
+}
+
+.sb-arsiv__bos-metin {
+	margin: 0 0 20px;
+	color: var(--wp--preset--color--metin-govde);
+}
+
+.sb-bos__arama {
+	display: flex;
+	gap: 10px;
+	margin: 0 0 20px;
+}
+
+.sb-bos__arama input[type="search"] {
+	flex: 1 1 auto;
+	min-width: 0;
+	min-height: 44px;
+	padding: 0 14px;
+	border: 1px solid var(--wp--preset--color--kenarlik);
+	border-radius: 12px;
+	background: var(--wp--preset--color--yuzey);
+}
+
+.sb-bos__arama .sb-btn,
+.sb-arsiv__bos > .sb-btn {
+	min-width: 44px;
+	min-height: 44px;
+}
+
+/* Boş aramada iletişim: WhatsApp düğmesi, altında telefon (sb_kunye_deger_html bağlantısı, 44 px). */
+.sb-bos__iletisim {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+}
+
+.sb-bos__telefon {
+	margin: 0;
+	color: var(--wp--preset--color--metin-govde);
+}
+
+.sb-bos__telefon a {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
+	font-weight: 700;
+	color: var(--wp--preset--color--metin);
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+
+/* ---------- Sayfalama: 44×44 kareler, gerçek bağlantılar (spec §4.2) ----------
+   Etkin sayfa kırmızı dolgu üstünde beyaz (5,03:1), köşe 12 px (düğme köşesi). */
+.sb-sayfalama {
+	margin-top: 60px;
+}
+
+.sb-sayfalama ul.page-numbers {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.sb-sayfalama .page-numbers:not(ul) {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 44px;
+	min-height: 44px;
+	padding: 0 8px;
+	font-size: 16px;
+	line-height: 1;
+	color: var(--wp--preset--color--metin-govde, #747474);
+	text-decoration: none;
+	border: 1px solid transparent;
+	border-radius: 12px;
+}
+
+.sb-sayfalama a.page-numbers:hover,
+.sb-sayfalama a.page-numbers:focus-visible,
+.sb-sayfalama .page-numbers.current {
+	color: var(--wp--preset--color--aksan-uzeri, #333333);
+	background: var(--wp--preset--color--aksan, #c3b8a5);
+}
+
+.sb-sayfalama .page-numbers.dots {
+	border: 0;
+}
+
+/* ---------- Renk seçicisi: rengin adı swatch'ın altında (sb_swatch_etiketi) ----------
+   Eklenti öğeyi --wvs-single-product-item-width/height (44 px, tools/kur/60) ile sabit
+   kutu çiziyor ve içini renk kutusuna ayırıyor. Ad kutunun dışına, altına konur; seçim
+   alanı 44×44 kalır, ada tıklamak da seçer (olay öğeye kabarcıklanır). Stil ürün
+   sayfasında magaza.css ile gelir (ilgili ürün kartları için zaten yüklü). */
+body.woo-variation-swatches .variable-items-wrapper .variable-item.color-variable-item {
+	margin: 4px 14px 30px 4px;
+}
+
+/* Swatch'ın klavye odak halkası (Görev 12 incelemesi): eklenti öğeye outline: none veriyor
+   (frontend.css:711, 0,3,0) ve genel halkayı (base.css) yeniyor; seçili swatch'ın siyah çerçevesi
+   odakta hiç değişmiyordu, seçili olmayanınki açık gri (1,36:1). */
+body.woo-variation-swatches .variable-items-wrapper .variable-item:focus-visible {
+	outline: 2px solid var(--sb-odak-rengi, var(--wp--preset--color--metin, #333333));
+	outline-offset: 3px;
+}
+
+body.woo-variation-swatches .variable-items-wrapper .variable-item .sb-swatch-ad {
+	position: absolute;
+	top: calc(100% + 6px);
+	left: 50%;
+	font-size: 12px;
+	line-height: 1.4;
+	white-space: nowrap;
+	color: var(--wp--preset--color--metin, #333333);
+	transform: translateX(-50%);
+}
+
+/* Tükenmiş değer (Görev 12, spec §6.4; sb_swatch_etiketi): adın altında "Tükendi". Eklenti kapalı
+   öğenin bütün <span>'lerini ve içeriğini %60 soldurur (woo-variation-swatches frontend.css:812,
+   :hover dahil); yalnız renk kutusu ve düğme metni solar, ad ve "Tükendi" AA'da okunur kalır. */
+body.woo-variation-swatches .variable-items-wrapper .variable-item .sb-swatch-durum {
+	display: block;
+	color: var(--wp--preset--color--metin-ikincil, #6a6a6a);
+}
+
+/* Seçime göre kapanan swatch'lar için nitelik satırında tek açıklama (sb_swatch_aciklamasi): yalnız
+   satırda "Tükendi" yazmayan (sb-tukendi olmayan) kapalı öğe varken görünür. */
+body.woo-variation-swatches .sb-swatch-aciklama {
+	display: none;
+	margin: 0 0 8px;
+	font-size: 14px;
+	line-height: 1.4;
+	color: var(--wp--preset--color--metin-ikincil, #6a6a6a);
+}
+
+body.woo-variation-swatches .variable-items-wrapper:has(.variable-item.disabled:not(.sb-tukendi)) ~ .sb-swatch-aciklama {
+	display: block;
+}
+
+/* Kapalı öğe tıklanamaz: eklenti tık işleyicisinde disabled'ı dışlamıyor (yalnız klavyede,
+   frontend.js:385); tık kapalı değeri select'e yazıyor, jQuery kapalı seçeneği okumuyor ve
+   önceki seçim boşalıyordu (Görev 12'de ölçüldü). Eklentinin kendi kuralı yorumda (:807). */
+body.woo-variation-swatches .variable-items-wrapper .variable-item:not(.radio-variable-item).disabled {
+	pointer-events: none;
+}
+
+body.woo-variation-swatches .variable-items-wrapper .variable-item.color-variable-item:has(.sb-swatch-durum) {
+	margin-bottom: 48px;
+}
+
+body.woo-variation-swatches .variable-items-wrapper .variable-item.button-variable-item:has(.sb-swatch-durum) {
+	margin-bottom: 30px;
+}
+
+body.woo-variation-swatches .variable-items-wrapper .variable-item:not(.radio-variable-item).disabled .variable-item-contents,
+body.woo-variation-swatches .variable-items-wrapper .variable-item:not(.radio-variable-item).disabled:hover .variable-item-contents,
+body.woo-variation-swatches .variable-items-wrapper .variable-item:not(.radio-variable-item).disabled :is(.sb-swatch-ad, .sb-swatch-ad .sb-swatch-durum),
+body.woo-variation-swatches .variable-items-wrapper .variable-item:not(.radio-variable-item).disabled:hover :is(.sb-swatch-ad, .sb-swatch-ad .sb-swatch-durum) {
+	opacity: 1;
+}
+
+/* ---------- Ortak bölüm başlığı ve kaydırmalı ürün şeridi ----------
+   Ana sayfanın ürün şeridi (Görev 7) ve ürün sayfasının ilgili ürünler şeridi (Görev 9)
+   aynı işaretlemeyi ve serit.js'i kullanır; iki sayfada da magaza.css yüklü
+   (inc/assets.php sb_stil_haritasi). anasayfa.css'ten taşındı (Görev 9). */
+.sb-bolum-ust {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 20px;
+	margin-bottom: 40px;
+}
+
+.sb-bolum-baslik {
+	margin: 0 0 40px;
+	color: var(--wp--preset--color--metin, #333);
+	font-size: clamp(1.625rem, 1.2rem + 1.6vw, 2.625rem);
+	font-weight: 400;
+	line-height: 1.2;
+	letter-spacing: 0.15em;
+	text-transform: uppercase;
+}
+
+.sb-bolum-ust .sb-bolum-baslik {
+	margin-bottom: 0;
+}
+
+.sb-serit-bolum {
+	padding-block: 50px 80px;
+}
+
+.sb-serit__oklar {
+	display: flex;
+	gap: 10px;
+}
+
+.sb-serit__oklar[hidden] {
+	display: none;
+}
+
+/* Mobilde oklar yok: başlığın üstüne biniyordu (hallmark kapı 52); şerit parmakla kayar, yandaki kart
+   yarım görünür. */
+@media (max-width: 767px) {
+	.sb-serit__oklar {
+		display: none;
+	}
+}
+
+.sb-serit__ok {
+	display: inline-grid;
+	place-items: center;
+	width: 44px;
+	height: 44px;
+	padding: 0;
+	border: 1px solid var(--wp--preset--color--kenarlik, #dedede);
+	border-radius: 50%;
+	background: #fff;
+	color: var(--wp--preset--color--metin, #333);
+	font-size: 1.125rem;
+	cursor: pointer;
+	transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.sb-serit__ok:hover:not([aria-disabled="true"]) {
+	border-color: var(--wp--preset--color--aksan, #c3b8a5);
+	background: var(--wp--preset--color--aksan, #c3b8a5);
+}
+
+.sb-serit__ok[aria-disabled="true"] {
+	opacity: 0.45;
+	cursor: default;
+}
+
+.sb-serit-bolum ul.products.sb-serit__liste {
+	display: flex;
+	gap: 20px;
+	margin: 0;
+	padding: 0 0 10px;
+	list-style: none;
+	overflow-x: auto;
+	overscroll-behavior-x: contain;
+	scroll-snap-type: x mandatory;
+	scroll-behavior: auto;
+}
+
+.sb-serit-bolum ul.products.sb-serit__liste::before,
+.sb-serit-bolum ul.products.sb-serit__liste::after {
+	content: none;
+}
+
+.sb-serit-bolum ul.products.sb-serit__liste > li.product {
+	flex: 0 0 80%;
+	width: auto;
+	margin: 0;
+	float: none;
+	scroll-snap-align: start;
+}
+
+/* Şerit bir kaydırma kabı (overflow-x: auto → overflow-y de auto): dışa taşan odak halkası
+   kırpılıyordu (Görev 12 odak taraması). Halka öğenin içine çizilir. */
+.sb-serit-bolum ul.products.sb-serit__liste :is(a, button):focus-visible {
+	outline-offset: -2px;
+}
+
+@media (min-width: 768px) {
+	.sb-serit-bolum ul.products.sb-serit__liste > li.product {
+		flex-basis: calc((100% - 20px) / 2);
+	}
+}
+
+@media (min-width: 992px) {
+	.sb-serit-bolum ul.products.sb-serit__liste > li.product {
+		flex-basis: calc((100% - 60px) / 4);
+	}
+}

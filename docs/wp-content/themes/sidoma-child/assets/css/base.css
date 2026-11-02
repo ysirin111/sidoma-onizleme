@@ -1,0 +1,298 @@
+/* =====================================================================
+   Sidoma Turizm — temel stil (base.css)
+   Sıra: 1) Outfit @font-face  2) Blocksy değişken eşlemesi  3) --sb-* token'ları
+         4) temel öğeler  5) odak, kaydırma, hareket  6) .sb-bilgi  7) .sb-btn
+   Renk, font ailesi, boyut ve boşluk ölçeğinin tek kaynağı theme.json'dır
+   (--wp--preset--*); burada yalnız preset olmayan token'lar tanımlanır.
+
+   KIRILIM NOKTALARI — tek yer; @custom-media yok, düz değerler, min-width:
+     768px  : tablet; kenar boşluğu 24 → 40
+     992px  : masaüstü düzeni; header'da arama, hesap ve İletişim; 4 sütun ya da 3 sütun + filtre
+     1280px : geniş masaüstü; kenar 100 (1440'ta içerik 1240); ana menü header çubuğunda
+              (altında çekmecede)
+     1600px : çok geniş; kap 1440'ta sabit kalır, yalnız ortalanır
+   Blocksy'nin kendi kırılımları (max-width 689.98 / 999.98) yalnız Blocksy
+   bileşenleri içindir; bizim bileşenlerimiz yukarıdakileri kullanır.
+   Bağımsız etkileşimli öğeler en az 44×44 px (--sb-dokunma; spec §4.1).
+   ===================================================================== */
+
+/* Outfit (SIL OFL 1.1 — ../fonts/OFL.txt), kendi sunucumuzdan: Google'a istek gitmez (spec §6.8; owner
+   2026-10-24, ana sayfa düzeltme turu D1). Değişken ağırlık 100–900, iki altküme (dosyalar ve unicode-range
+   Studio Buga'dan, 615c64d; Google Fonts css2 yanıtı):
+     latin     : ç ö ü ı Ç Ö Ü      (U+0000-00FF, U+0131)
+     latin-ext : ş ğ İ Ş Ğ          (U+0100-02BA)
+   Türkçe metin ikisini birden gerektirir; ikisi de performans.php'de preload edilir.
+   ₺ (U+20BA) Outfit'te YOK: üçüncü yüz, Plus Jakarta Sans latin-ext dosyasından yalnız ₺ içeren alt küme
+   (outfit-tl.woff2, ~1 KB, değişken ağırlık 200–800; pyftsubset --unicodes=U+20BA). latin-ext yüzünün aralığından
+   U+20BA çıkarıldı (U+20AD-20B9, U+20BB-20C0): tarayıcı ₺ için glifsiz dosyaya gidip sistem yazı tipine düşmesin.
+   Üç yüzün font-weight tanımı aynı (100 900) olmalı: Chromium aileyi aynı tanımlı yüzlerden birleştirir, tanımı farklı
+   yüzler arasından tek birini seçer (ölçüldü: alt kümenin 200 800'ü seçilince Türkçe harfler dahil bütün metin sistem
+   yazı tipine düştü). Dosyanın ekseni 200–800; dışındaki istekte tarayıcı ekseni sınıra kırpar.
+   Alt küme preload edilmez: yalnız ₺ geçen sayfada iner. */
+@font-face {
+  font-family: "Outfit";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("../fonts/outfit-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Outfit";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("../fonts/outfit-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20B9, U+20BB-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: "Outfit";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("../fonts/outfit-tl.woff2") format("woff2");
+  unicode-range: U+20BA;
+}
+
+/* Blocksy renkleri, yazı tipini ve düğme ölçülerini kendi :root değişkenlerinden
+   basıyor ve bu değişkenleri <head>'e inline <style> olarak bizim dosyalarımızdan
+   SONRA koyuyor. Değişkenleri kaynağında eşlemek özgüllük savaşından sağlam:
+   Blocksy neyi boyarsa doğru renkle boyar. `html:root` (0,1,1) Blocksy'nin
+   `:root` (0,1,0) kuralını sıradan bağımsız yener (nostaljikradyo base.css:79-109).
+   Palet 7 site zeminidir (blocksy/inc/dynamic-styles/global/background.php:12): taslağın #F6F4F1'i
+   (zemin; metin-govde orada 7,60:1). Palet 8 Blocksy'nin beyaz yüzeyidir (kart, açılır panel): yuzey. */
+html:root {
+  --theme-palette-color-1: var(--wp--preset--color--aksan);
+  --theme-palette-color-2: var(--wp--preset--color--aksan-koyu);
+  --theme-palette-color-3: var(--wp--preset--color--metin-govde);
+  --theme-palette-color-4: var(--wp--preset--color--metin);
+  --theme-palette-color-5: var(--wp--preset--color--kenarlik);
+  --theme-palette-color-6: var(--wp--preset--color--yuzey-2);
+  --theme-palette-color-7: var(--wp--preset--color--zemin);
+  --theme-palette-color-8: var(--wp--preset--color--yuzey);
+
+  --theme-text-color: var(--wp--preset--color--metin-govde);
+  --theme-headings-color: var(--wp--preset--color--metin);
+  --theme-link-initial-color: var(--wp--preset--color--metin);
+  --theme-link-hover-color: var(--wp--preset--color--aksan-koyu);
+  --theme-border-color: var(--wp--preset--color--kenarlik);
+  --theme-selection-text-color: var(--wp--preset--color--aksan-uzeri);
+  --theme-selection-background-color: var(--wp--preset--color--aksan);
+
+  /* Düğmeler: kırmızı dolgu + beyaz metin (5,03:1); hover koyu kırmızı + beyaz (6,78:1). Köşe taslağın
+     arama düğmesindeki 12 px, yükseklik en az 44 px. */
+  --theme-button-text-initial-color: var(--wp--preset--color--aksan-uzeri);
+  --theme-button-text-hover-color: var(--wp--preset--color--yuzey);
+  --theme-button-background-initial-color: var(--wp--preset--color--aksan);
+  --theme-button-background-hover-color: var(--wp--preset--color--aksan-koyu);
+  --theme-button-min-height: var(--sb-dokunma);
+  /* Form alanları da ≥ 44 px (spec §4.1; Görev 12 ölçümü: Blocksy varsayılanı 40). Blocksy
+     alan yüksekliğini bu değişkenden okur; Fluent Forms alanları da onu izliyor (ölçüldü). */
+  --theme-form-field-height: var(--sb-dokunma);
+  --theme-button-border-radius: 12px;
+  --theme-form-field-border-radius: 12px;
+  --theme-border-radius: 0;
+  /* Kart köşe yuvarlaklığı: taslağın 18 px'i (Plan 2 Global Constraints); tek yer. */
+  --sb-kart-radius: 18px;
+
+  /* Yazı tipi: Blocksy "System Default" yığınını da Outfit'e eşliyoruz; bir başlık
+     tipografisinde ayrıca "System Default" seçilse bile Outfit kalır. */
+  --theme-font-stack-default: var(--wp--preset--font-family--ana);
+  --theme-font-family: var(--wp--preset--font-family--ana);
+  --theme-line-height: 1.8;
+
+  /* Yıldız puanı (Blocksy woocommerce/general/star-rating.php; varsayılan #FDA256 beyazda
+     ~2:1). Dolu yıldız aksan-koyu (beyazda 6,78:1), boş yıldız kenarlık (doluyla 5,35:1);
+     formdaki yıldızlar dolu rengi kullanır (Plan 2 Görev 2, WCAG 1.4.11). */
+  --star-rating-initial-color: var(--wp--preset--color--aksan-koyu);
+  --star-rating-inactive-color: var(--wp--preset--color--kenarlik);
+}
+
+/* Preset olmayan token'lar (spec §4.1). */
+:root {
+  --sb-dokunma: 44px;
+
+  --sb-satir-govde: 1.8;
+  --sb-satir-arayuz: 1.4;
+  --sb-satir-baslik: 1.2;
+
+  /* Harf aralıkları; büyük harf CSS ile, kaynak metin normal yazımla. */
+  --sb-harf-etiket: 0.2em;
+  --sb-harf-sekme: 0.11em;
+  --sb-harf-genis: 0.15em;
+
+  /* Yerleşim: içerik 1240 (kap 1440), mobil kenar 24. Header'ın kendi ölçüleri layout.css'te
+     (taslağın 44 px yan boşluğu, Plan 2 Görev 5). */
+  --sb-icerik: 1240px;
+  --sb-kenar: 24px;
+
+  /* Süreler (spec §4.4): geçiş 0,2–0,3 sn, kart ikinci görseli 0,5 sn. */
+  --sb-sure-hizli: 0.2s;
+  --sb-sure: 0.3s;
+  --sb-sure-gorsel: 0.5s;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --sb-kenar: 40px;
+  }
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --sb-kenar: 100px;
+  }
+}
+
+/* Form öğeleri tarayıcı varsayılan fontunu değil sayfanın fontunu kullanır. */
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+/* Başlık satır yüksekliği 1.2. Blocksy başlıklara --theme-line-height'ı inline
+   `h1 { --theme-line-height: 1.5 }` ile veriyor; değişkeni değil özelliği
+   yazıyoruz ki sıradan bağımsız geçerli olsun. */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  line-height: var(--sb-satir-baslik);
+}
+
+/* Odak halkası: klavye kullanıcısı nerede olduğunu her zaman görmeli. Blocksy
+   a/button halkasını palet 1'le (kum, beyazda 1,96:1) çiziyordu; halka koyu
+   metin rengiyle (≥ 7:1) çizilir. `html :is(…):focus-visible` (0,2,1) Blocksy'nin
+   `a:focus-visible` (0,1,1) kuralını yener. Koyu zeminli bileşen halka rengini
+   --sb-odak-rengi ile kendisi verir (koyu zeminde `metin` 1,52:1 kalır). */
+html :is(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--sb-odak-rengi, var(--wp--preset--color--metin));
+  outline-offset: 2px;
+}
+
+/* SAYFA GEÇİŞLERİ — nostaljikradyo dersi (base.css:231-252, ölçüm 2026-07-31):
+   cross-document View Transitions açıkken ::view-transition katmanı ilk boyamadaki
+   tıkları yutuyordu (erken tık 0/4; kapalıyken 6/6). Bu temada @view-transition
+   YOK ve eklenmez; bekçisi tools/tarayici/tik-kaybi.mjs.
+   Blocksy `html { scroll-behavior: smooth }` basıyor (static/bundle/main.min.css);
+   kaydırma sürerken yapılan tık, basma ile bırakma arasında hedef değiştirdiği
+   için amaçlanan bağlantıya gitmiyordu. Anlık kaydırma tık hedefini sabit tutar. */
+html:root {
+  scroll-behavior: auto;
+}
+
+/* Hareketi azalt tercihi açıkken animasyon ve geçiş çalışmaz. Gecikmeler de
+   sıfırlanır: yalnız süreyi kısaltmak kademeli gecikmeli içeriği saniyelerce
+   görünmez bırakırdı (nostaljikradyo base.css:254-268). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* "BURAYA BİLGİ GELECEK" yer tutucusu (spec §3.5; işaretleme Görev 3 sb_bilgi()).
+   Belirgin kesikli kutu; ekran okuyucuda role="note" ile okunur. Satır içinde de
+   blok içinde de çalışır. engel seviyesi koyu kenarlık alır. */
+.sb-bilgi {
+  display: inline-block;
+  box-sizing: border-box;
+  max-inline-size: 100%;
+  padding: 4px 10px;
+  border: 2px dashed var(--wp--preset--color--aksan-koyu);
+  background-color: var(--wp--preset--color--yuzey);
+  color: var(--wp--preset--color--metin);
+  font-size: var(--wp--preset--font-size--kucuk);
+  font-weight: 600;
+  line-height: var(--sb-satir-arayuz);
+  letter-spacing: 0.05em;
+  overflow-wrap: anywhere;
+}
+
+.sb-bilgi[data-sb-bilgi="engel"] {
+  border-color: var(--wp--preset--color--metin);
+}
+
+/* Düğmeler. Renkler Blocksy'nin --theme-button-* değişkenlerinden okunur; varyant
+   yalnız değişkenleri değiştirir. Böylece aynı varyant Blocksy'nin kendi düğme
+   seçicilerine (.woocommerce button.button vb.) takılan öğede de aynı görünür.
+   Kenarlık rengi --sb-btn-kenar ile, verilmezse dolgu rengiyle çizilir. */
+.sb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-sizing: border-box;
+  min-block-size: var(--sb-dokunma);
+  min-inline-size: var(--sb-dokunma);
+  padding: 0 30px;
+  border: 1px solid var(--sb-btn-kenar, var(--theme-button-background-initial-color));
+  border-radius: var(--theme-button-border-radius);
+  background-color: var(--theme-button-background-initial-color);
+  color: var(--theme-button-text-initial-color);
+  font-family: inherit;
+  font-size: var(--wp--preset--font-size--normal);
+  font-weight: 500;
+  line-height: var(--sb-satir-arayuz);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--sb-sure-hizli),
+    color var(--sb-sure-hizli),
+    border-color var(--sb-sure-hizli);
+}
+
+.sb-btn:hover,
+.sb-btn:focus-visible {
+  border-color: var(--sb-btn-kenar-hover, var(--theme-button-background-hover-color));
+  background-color: var(--theme-button-background-hover-color);
+  color: var(--theme-button-text-hover-color);
+}
+
+/* Dolu: kırmızı dolgu + beyaz metin (5,03:1); hover koyu kırmızı + beyaz (6,78:1). */
+.sb-btn--dolu {
+  --theme-button-background-initial-color: var(--wp--preset--color--aksan);
+  --theme-button-text-initial-color: var(--wp--preset--color--aksan-uzeri);
+  --theme-button-background-hover-color: var(--wp--preset--color--aksan-koyu);
+  --theme-button-text-hover-color: var(--wp--preset--color--yuzey);
+}
+
+/* Çerçeve: açık zeminde koyu metin + kırmızı çizgi; hover kırmızı dolgu + beyaz. */
+.sb-btn--cerceve {
+  --theme-button-background-initial-color: transparent;
+  --theme-button-text-initial-color: var(--wp--preset--color--metin);
+  --theme-button-background-hover-color: var(--wp--preset--color--aksan);
+  --theme-button-text-hover-color: var(--wp--preset--color--aksan-uzeri);
+  --sb-btn-kenar: var(--wp--preset--color--aksan);
+  --sb-btn-kenar-hover: var(--wp--preset--color--aksan);
+}
+
+/* Hayalet: fotoğraf ya da koyu dolgu üstünde beyaz metin; hover beyaz dolgu.
+   Açık fotoğraf üstünde kullanılacaksa bileşen koyu bir perde ekler. */
+.sb-btn--hayalet {
+  --theme-button-background-initial-color: transparent;
+  --theme-button-text-initial-color: var(--wp--preset--color--yuzey);
+  --theme-button-background-hover-color: var(--wp--preset--color--yuzey);
+  --theme-button-text-hover-color: var(--wp--preset--color--metin);
+  --sb-btn-kenar: rgba(255, 255, 255, 0.6);
+  --sb-btn-kenar-hover: var(--wp--preset--color--yuzey);
+  --sb-odak-rengi: var(--wp--preset--color--yuzey);
+}

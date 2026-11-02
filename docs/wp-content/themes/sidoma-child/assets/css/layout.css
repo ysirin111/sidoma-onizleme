@@ -1,0 +1,1207 @@
+/* =====================================================================
+   Sidoma Turizm — yerleşim (layout.css)
+   İçerik kabı, header, arama paneli, menü çekmecesi, mini sepet, footer, başlık
+   bandı, WC iletileri ve çerez bandı; her sayfada yüklenir. Kırılım noktaları: base.css başı.
+   ===================================================================== */
+
+/* İçerik kabı: en fazla 1440 px, yanlarda --sb-kenar (24 → 40 → 100);
+   1440'ta içerik 1240 px (spec §4.1). 100vw kullanılmaz — kaydırma çubuğunu
+   saymadığı için yatay taşma yaratır. */
+.sb-kap {
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: calc(var(--sb-icerik) + 2 * var(--sb-kenar));
+  margin-inline: auto;
+  padding-inline: var(--sb-kenar);
+}
+
+/* =====================================================================
+   HEADER · DUYURU · ARAMA PANELİ · MOBİL ÇEKMECE  (Plan 2 Görev 5; spec §4.2)
+   Ölçüler onaylı taslağın .ust / .menu / .cta kurallarından: logo 58 px, öğe aralığı 40 px, yan boşluk
+   44 px, menü 13 px büyük harf (.14em, 500, %92), menü aralığı 30 px, ok 9 px (%70), çerçeveli hap düğme
+   (11 × 22 px, 999 px köşe). Kırılımlar (base.css listesi): < 992 menü düğmesi, ortada logo, sepet;
+   992'de arama, hesap ve İletişim düğmesi; ana menü 1280'de çubuğa çıkar (dört kategori adı daha dar
+   ekranda tek satıra sığmıyor), altında menü çekmecede.
+   Tek kip (inc/nav.php sb_header_html), ana sayfa dahil: beyaz zemin, renkli logo, koyu yazı, yapışkan.
+   ===================================================================== */
+
+/* ---- Duyuru şeridi (metin boşsa header.php hiç basmaz) ---- */
+.sb-duyuru {
+  background: var(--wp--preset--color--metin);
+  color: var(--wp--preset--color--yuzey);
+}
+
+.sb-duyuru__metin {
+  margin: 0;
+  padding-block: 6px;
+  font-size: 12px;
+  line-height: 1.4;
+  letter-spacing: 0.2em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+/* ---- Header çubuğu ---- */
+:root {
+  /* Standart header'ın yüksekliği (yapışkan; kaydırma payı, magaza.css): mobil 64, masaüstü 90. */
+  --sb-header-yuk: 64px;
+}
+
+.sb-header {
+  /* Çerçeveli düğmenin çizgisi ve menü alt çizgisi. */
+  --sb-header-cizgi: rgba(29, 31, 36, 0.4);
+  --sb-header-vurgu: var(--wp--preset--color--aksan);
+  position: sticky;
+  top: var(--admin-bar, 0px);
+  z-index: 100;
+  /* Alt çizgi gölgeyle: yer kaplamaz, header tam --sb-header-yuk boyunda kalır (404 bölümü ona göre). */
+  box-shadow: 0 1px 0 var(--wp--preset--color--kenarlik);
+  background: var(--wp--preset--color--yuzey);
+  color: var(--wp--preset--color--metin);
+}
+
+/* Mobil: logo tam ortada (owner 2026-10-01). Yan sütunlar eşit (1fr): menü solda, sepet sağda. */
+.sb-header__ic {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 4px;
+  box-sizing: border-box;
+  max-width: 1480px;
+  min-height: 64px;
+  margin-inline: auto;
+  padding-inline: 12px;
+}
+
+.sb-header__logo {
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  max-width: 100%;
+  overflow: hidden;
+  color: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-decoration: none;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Logo görseli (panelden ya da giriş kipinde beyaz logo): oran korunur, dar ekranda ezilmez. */
+.sb-header__logo-gorsel {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 40px;
+}
+
+.sb-header__ikonlar {
+  display: flex;
+  align-items: center;
+  justify-self: end;
+}
+
+/* Bağımsız etkileşimli öğe: en az 44×44 (spec §4.1). */
+.sb-header__ikon,
+.sb-kapat {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.sb-header__ikon:hover,
+.sb-kapat:hover {
+  opacity: 0.7;
+}
+
+.sb-header__menu-dugme {
+  justify-self: start;
+}
+
+/* Mobilde arama, hesap ve İletişim çekmecede (owner 2026-10-01: header'da menü, logo, sepet). */
+.sb-header__ikon--hesap,
+.sb-header__ikon--ara,
+.sb-header__iletisim {
+  display: none;
+}
+
+.sb-ikon {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+/* Sepet sayacı: kırmızı dolgu + beyaz metin (5,03:1). */
+.sb-sepet-adet {
+  position: absolute;
+  top: 4px;
+  right: 0;
+  min-width: 18px;
+  height: 18px;
+  padding-inline: 4px;
+  border-radius: 999px;
+  background: var(--wp--preset--color--aksan);
+  color: var(--wp--preset--color--aksan-uzeri);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+}
+
+.sb-sepet-adet[hidden] {
+  display: none;
+}
+
+/* "İletişim" çerçeveli hap düğme (taslak .cta). */
+.sb-header__iletisim {
+  align-items: center;
+  min-height: 44px;
+  margin-left: 12px;
+  padding: 0 22px;
+  border: 1px solid var(--sb-header-cizgi);
+  border-radius: 999px;
+  color: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-decoration: none;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition:
+    background-color var(--sb-sure-hizli),
+    border-color var(--sb-sure-hizli),
+    color var(--sb-sure-hizli);
+}
+
+.sb-header__iletisim:hover {
+  border-color: var(--wp--preset--color--metin);
+  background: var(--wp--preset--color--metin);
+  color: var(--wp--preset--color--yuzey);
+}
+
+/* ---- Ana menü (≥ 1280; altında çekmecede) ---- */
+.sb-nav {
+  display: none;
+}
+
+.sb-nav__liste,
+.sb-nav__alt {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sb-nav__liste {
+  display: flex;
+  align-items: center;
+}
+
+.sb-nav__oge {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Öğe aralığı 30 px. Açılır listeli öğede aralığı açma düğmesinin ok sonrası boşluğu verir. */
+.sb-nav__oge:not(.sb-nav__oge--alt) + .sb-nav__oge {
+  margin-left: 30px;
+}
+
+.sb-nav__baglanti {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-decoration: none;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0.92;
+}
+
+/* Etkin ve üzerine gelinen öğe: alt çizgi (durum göstergesi, kırmızı beyazda 5,03:1; giriş kipinde beyaz). */
+.sb-nav__baglanti::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 8px;
+  left: 0;
+  height: 2px;
+  background: var(--sb-header-vurgu);
+  transform: scaleX(0);
+  transition: transform var(--sb-sure);
+}
+
+.sb-nav__oge--etkin > .sb-nav__baglanti::after,
+.sb-nav__baglanti:hover::after {
+  transform: scaleX(1);
+}
+
+/* Açma düğmesi: 44 × 44 dokunma alanı; ok solda (taslakta etiketten 4 px sonra), sağdaki 30 px menü
+   aralığıdır. */
+.sb-nav__ac {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 44px;
+  height: 44px;
+  padding: 0 0 0 4px;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.sb-nav__ac .sb-ikon {
+  width: 10px;
+  height: 10px;
+  opacity: 0.7;
+  stroke-width: 2.5;
+  transition: transform var(--sb-sure-hizli);
+}
+
+.sb-nav__oge[data-acik] > .sb-nav__ac .sb-ikon {
+  transform: rotate(180deg);
+}
+
+/* Fare öğeden listeye geçerken liste kapanmasın: öğenin altındaki 8 px boşluğu öğeye katan köprü. */
+.sb-nav__oge--alt::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  height: 10px;
+}
+
+/* Açılır liste: beyaz kart, öğenin altına 8 px boşlukla oturur. Uzun liste (Günübirlik 13 tur) ekrandan
+   taşmaz, kendi içinde kayar: header yapışkan, sayfa kaydırması listeyi göstermez. Kapalıyken
+   visibility: hidden (odak almaz, ekran okuyucu okumaz). */
+.sb-nav__alt {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: -14px;
+  z-index: 1;
+  box-sizing: border-box;
+  min-width: 300px;
+  max-width: 380px;
+  max-height: calc(100vh - var(--sb-header-yuk) - var(--admin-bar, 0px) - 24px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 8px;
+  border: 1px solid var(--wp--preset--color--kenarlik);
+  border-radius: 14px;
+  background: var(--wp--preset--color--yuzey);
+  box-shadow: 0 12px 32px rgba(29, 31, 36, 0.14);
+  color: var(--wp--preset--color--metin);
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.2s, transform 0.2s, visibility 0s linear 0.2s;
+}
+
+/* Açılış: JS'siz :hover (yalnız fareli cihazda; dokunmatikte ilk dokunuş bağlantıyı yutmasın) ve
+   :focus-within; JS'le açma düğmesi (data-acik). JS varken klavye odağı listeyi açmaz, düğme açar
+   (nav.js, aria-expanded). Esc fareyle açılmış listeyi de kapatır (data-sb-kapali; WCAG 1.4.13). */
+@media (hover: hover) {
+  .sb-nav__oge:hover > .sb-nav__alt {
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+    transition-delay: 0s;
+  }
+}
+
+.sb-nav:not([data-sb-js]) .sb-nav__oge:focus-within > .sb-nav__alt,
+.sb-nav__oge[data-acik] > .sb-nav__alt {
+  visibility: visible;
+  opacity: 1;
+  transform: none;
+  transition-delay: 0s;
+}
+
+.sb-nav__oge[data-sb-kapali] > .sb-nav__alt {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.sb-nav__alt a {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  color: var(--wp--preset--color--metin);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.35;
+  text-decoration: none;
+}
+
+.sb-nav__alt a:hover,
+.sb-nav__alt a[aria-current="page"] {
+  background: var(--wp--preset--color--yuzey-2);
+}
+
+/* ---- Arama paneli: ekranın üstünde sabit katman (giriş kipinde de sahneyle kırpılmaz) ---- */
+.sb-arama {
+  position: fixed;
+  top: var(--admin-bar, 0px);
+  right: 0;
+  left: 0;
+  z-index: 150;
+  border-bottom: 1px solid var(--wp--preset--color--kenarlik);
+  background: var(--wp--preset--color--yuzey);
+  box-shadow: 0 12px 32px rgba(29, 31, 36, 0.12);
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.2s, transform 0.2s, visibility 0s linear 0.2s;
+}
+
+.sb-arama[data-acik],
+.sb-arama:target {
+  visibility: visible;
+  opacity: 1;
+  transform: none;
+  transition-delay: 0s;
+}
+
+/* Panel header çubuğunun boyunda: çubuğun üstünü tam örter. */
+.sb-arama__ic {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: var(--sb-header-yuk);
+  padding-block: 12px;
+}
+
+.sb-arama .woocommerce-product-search {
+  flex: 1;
+  display: flex;
+  gap: 10px;
+}
+
+/* Taslağın arama kutusu: 12 px köşe, kırmızı düğme. Alan çizgisi metin-ikincil (beyazda 5,04:1). */
+.sb-arama .search-field {
+  flex: 1;
+  min-width: 0;
+  min-height: 52px;
+  padding: 0 18px;
+  border: 1px solid var(--wp--preset--color--metin-ikincil);
+  border-radius: 12px;
+  background: var(--wp--preset--color--yuzey);
+  color: var(--wp--preset--color--metin);
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.sb-arama .search-field:focus-visible {
+  outline-offset: 2px;
+}
+
+.sb-arama .woocommerce-product-search button {
+  min-height: 52px;
+  padding-inline: 28px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--wp--preset--color--aksan);
+  color: var(--wp--preset--color--aksan-uzeri);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sb-arama .woocommerce-product-search button:hover {
+  background: var(--wp--preset--color--aksan-koyu);
+}
+
+/* Blocksy'nin arama düğmesi (ct-search-form) ikonu gövde rengiyle çiziyordu: kırmızı dolguda 1,66:1
+   (WCAG 1.4.11 ≥ 3:1). İkon düğmenin yazı rengiyle, beyaz (5,03:1). Panel, çekmece ve diğer arama
+   kutuları aynı işaretlemeyi kullanır. */
+.ct-search-form button[type="submit"] .ct-icon {
+  fill: currentColor;
+}
+
+/* ---- Mobil çekmece (< 1280; soldan, sayfayı karartmaz — Mober) ---- */
+.sb-cekmece {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  visibility: hidden;
+  pointer-events: none;
+  transition: visibility 0s linear 0.2s;
+}
+
+.sb-cekmece[data-acik],
+.sb-cekmece:target {
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.sb-cekmece__panel {
+  position: absolute;
+  top: var(--admin-bar, 0px);
+  bottom: 0;
+  left: 0;
+  width: min(320px, 85vw);
+  overflow-y: auto;
+  padding: 10px 24px 40px;
+  background: var(--wp--preset--color--yuzey);
+  box-shadow: 0 0 24px rgba(29, 31, 36, 0.18);
+  pointer-events: auto;
+  transform: translateX(-100%);
+  transition: transform 0.2s;
+}
+
+.sb-cekmece[data-acik] .sb-cekmece__panel,
+.sb-cekmece:target .sb-cekmece__panel {
+  transform: none;
+}
+
+.sb-cekmece__ust {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.sb-cekmece__liste,
+.sb-cekmece__alt {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sb-cekmece__oge {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  border-bottom: 1px solid var(--wp--preset--color--kenarlik);
+}
+
+.sb-cekmece__liste a {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  color: var(--wp--preset--color--metin);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.sb-cekmece__alt-dugme {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--wp--preset--color--metin);
+  cursor: pointer;
+}
+
+.sb-cekmece__alt-dugme .sb-ikon {
+  transition: transform 0.2s;
+}
+
+.sb-cekmece__alt-dugme[aria-expanded="true"] .sb-ikon {
+  transform: rotate(180deg);
+}
+
+.sb-cekmece__alt {
+  flex-basis: 100%;
+  margin-bottom: 10px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  background: var(--wp--preset--color--zemin);
+}
+
+.sb-cekmece__alt a {
+  min-height: 44px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: normal;
+  line-height: 1.35;
+  text-transform: none;
+}
+
+.sb-cekmece__hesap {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  margin-top: 20px;
+  color: var(--wp--preset--color--metin);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.sb-cekmece__arama {
+  margin-top: 24px;
+}
+
+@media (min-width: 992px) {
+  :root {
+    --sb-header-yuk: 90px;
+  }
+
+  .sb-header__ic {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 24px;
+    min-height: 90px;
+    padding: 16px 32px;
+  }
+
+  .sb-header__logo {
+    justify-self: start;
+    font-size: 18px;
+  }
+
+  .sb-header__logo-gorsel {
+    max-height: 58px;
+  }
+
+  .sb-header__ikon--hesap,
+  .sb-header__ikon--ara,
+  .sb-header__iletisim {
+    display: inline-flex;
+  }
+}
+
+/* Ana menü çubukta. 1280–1439'da aralıklar ve harf aralığı daralır: taslağın ölçüleriyle dört kategori adı,
+   yazıyla logo, üç ikon ve İletişim düğmesi 1351 px tutuyor (ölçüldü); 1440'ta taslağın ölçüleri.
+   Beşinci öğe VİP Transfer (Plan 3 Görev 3) menüyü ~100 px uzattı: 1280'de İletişim düğmesi ekranın 2 px dışına
+   taşıyordu (ölçüldü: ic 1280, scrollWidth 1282). Bu aralıkta kenar boşluğu, bloklar arası boşluk ve öğe aralığı daha
+   dar; menü çubuğu 1280–1439'da taşmaz (tarayıcı testi header.mjs, "menü çubuğu … taşmıyor"). */
+@media (min-width: 1280px) {
+  .sb-header__ic {
+    display: flex;
+    gap: 20px;
+    padding-inline: 24px;
+  }
+
+  .sb-header__menu-dugme {
+    display: none;
+  }
+
+  .sb-header__logo {
+    flex-shrink: 0;
+  }
+
+  .sb-nav {
+    display: block;
+    margin-left: auto;
+  }
+
+  .sb-nav__oge:not(.sb-nav__oge--alt) + .sb-nav__oge {
+    margin-left: 16px;
+  }
+
+  .sb-nav__baglanti,
+  .sb-header__iletisim {
+    letter-spacing: 0.06em;
+  }
+
+  .sb-header__iletisim {
+    padding-inline: 18px;
+  }
+
+  .sb-cekmece {
+    display: none;
+  }
+}
+
+@media (min-width: 1440px) {
+  .sb-header__ic {
+    gap: 40px;
+    padding-inline: 44px;
+  }
+
+  .sb-nav__oge:not(.sb-nav__oge--alt) + .sb-nav__oge {
+    margin-left: 30px;
+  }
+
+  .sb-nav__baglanti,
+  .sb-header__iletisim {
+    letter-spacing: 0.14em;
+  }
+
+  .sb-header__iletisim {
+    padding-inline: 22px;
+  }
+}
+
+/* =====================================================================
+   MİNİ SEPET ÇEKMECESİ  (Görev 6, spec §4.2, §4.4)
+   Kaynak: nostaljikradyo-child/assets/css/layout.css:439-619. Mober: 450 px,
+   sağdan, 0,3 sn (rep-motion.md §9). Köşe 0 (spec §4.1).
+   ===================================================================== */
+.sb-mini {
+  position: fixed;
+  inset: 0;
+  z-index: 210;
+  visibility: hidden;
+  pointer-events: none;
+  transition: visibility 0s linear 0.3s;
+}
+
+.sb-mini[data-acik] {
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+/* Örtü yalnız görseldir. Nostaljikradyo ölçümü (2026-07-31): örtü tık alırken
+   sepete eklemeden sonraki ilk tık hedefine hiç ulaşmıyordu. Dışarı tıkta
+   kapatmayı nav.js yapar. */
+.sb-mini__scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.sb-mini[data-acik] .sb-mini__scrim {
+  opacity: 1;
+}
+
+.sb-mini__panel {
+  position: absolute;
+  top: var(--admin-bar, 0px);
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 450px);
+  background: var(--wp--preset--color--yuzey);
+  pointer-events: auto;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.28, 0.59, 0.45, 0.93);
+}
+
+.sb-mini[data-acik] .sb-mini__panel {
+  transform: none;
+}
+
+.sb-mini__ust {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--wp--preset--color--kenarlik);
+}
+
+.sb-mini__baslik {
+  margin: 0;
+  color: var(--wp--preset--color--metin);
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.sb-mini__govde {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+}
+
+.sb-mini__govde .woocommerce-mini-cart {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sb-mini__govde .woocommerce-mini-cart-item {
+  position: relative;
+  display: block; /* Blocksy satırı grid yapıyor; görsel ve sil düğmesi mutlak konumlu olduğu için ad dar ilk sütuna sıkışıyordu */
+  min-height: 101px;
+  padding: 10px 44px 10px 90px;
+  border-bottom: 1px solid var(--wp--preset--color--kenarlik);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.sb-mini__govde .woocommerce-mini-cart-item a:not(.remove) {
+  color: var(--wp--preset--color--metin);
+  text-decoration: none;
+}
+
+/* Blocksy görseli .ct-media-container içine alabiliyor; ikisi de sola sabit, kart oranı 8:9. */
+.sb-mini__govde .woocommerce-mini-cart-item .ct-media-container,
+.sb-mini__govde .woocommerce-mini-cart-item img {
+  position: absolute;
+  top: 10px;
+  left: 0;
+  width: 72px;
+  height: 81px;
+  margin: 0;
+  object-fit: cover;
+}
+
+.sb-mini__govde .woocommerce-mini-cart-item .ct-media-container img {
+  position: static;
+  width: 100%;
+  height: 100%;
+}
+
+.sb-mini__govde .woocommerce-mini-cart-item .remove {
+  position: absolute;
+  top: 10px;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  color: var(--wp--preset--color--metin-ikincil);
+  font-size: 20px;
+  text-decoration: none;
+}
+
+.sb-mini__govde .woocommerce-mini-cart-item .quantity {
+  display: block;
+  margin-top: 5px;
+  color: var(--wp--preset--color--metin-ikincil);
+  white-space: nowrap;
+}
+
+.sb-mini__govde .woocommerce-mini-cart__total {
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  padding-block: 20px;
+  color: var(--wp--preset--color--metin);
+  font-weight: 500;
+}
+
+.sb-mini__govde .woocommerce-mini-cart__buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+}
+
+.sb-mini__govde .woocommerce-mini-cart__buttons .button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding-inline: 30px;
+  border: 1px solid var(--wp--preset--color--metin);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--wp--preset--color--metin);
+  font-size: 14px;
+  letter-spacing: 0.11em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.sb-mini__govde .woocommerce-mini-cart__buttons .button:hover,
+.sb-mini__govde .woocommerce-mini-cart__buttons .checkout {
+  background: var(--wp--preset--color--metin);
+  color: var(--wp--preset--color--yuzey);
+}
+
+/* Hover: koyu-dolgu artık metinle aynı (#1D1F24); bir ton açık gövde rengi (beyaz metin 8,34:1). */
+.sb-mini__govde .woocommerce-mini-cart__buttons .checkout:hover {
+  border-color: var(--wp--preset--color--metin-govde);
+  background: var(--wp--preset--color--metin-govde);
+}
+
+/* Boş durum: Blocksy'nin mini sepet şablonu WC'nin cart/cart-empty.php'sini basar
+   (blocksy/woocommerce/cart/mini-cart.php:146-154). */
+.sb-mini__govde .cart-empty {
+  display: flex; /* Blocksy iletiyi flex yapıyor: text-align tek başına ortalamaz, simge de ::before ile solda */
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 40px 20px 20px;
+  border: 0;
+  background: none;
+  color: var(--wp--preset--color--metin-ikincil);
+  text-align: center;
+}
+
+/* Zil simgesi akışa alınır, metnin üstünde ortada durur (owner isteği 2026-10-01). */
+.sb-mini__govde .cart-empty::before {
+  position: static;
+  flex: none;
+}
+
+.sb-mini__govde .return-to-shop {
+  margin: 0;
+  text-align: center;
+}
+
+/* =====================================================================
+   FOOTER  (Plan 2 Görev 5; spec §4.3)
+   Koyu dolgu (#1D1F24). Sütunlar: marka (beyaz logo + site sloganı), Turlar, panel menüleri
+   (sb_footer_1..3, atanmışsa), İletişim; alt satırda telif ve unvan, yasal bağlantılar, ödeme logoları.
+   Metin beyazın %72'si (koyu dolguda ≈ 9,6:1), bağlantılar %86'sı, başlıklar beyaz. Odak halkası beyaz.
+   ===================================================================== */
+.sb-footer {
+  --sb-odak-rengi: var(--wp--preset--color--yuzey);
+  width: 100%;
+  /* Blocksy #main-container esnek sütun; footer küçülüp çökmesin
+     (nostaljikradyo-child/assets/css/layout.css:44-51). */
+  flex-shrink: 0;
+  margin-top: 64px;
+  background: var(--wp--preset--color--koyu-dolgu);
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.sb-footer a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: rgba(255, 255, 255, 0.86);
+  text-decoration: none;
+  transition: color var(--sb-sure-hizli);
+}
+
+.sb-footer a:hover {
+  color: var(--wp--preset--color--yuzey);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* Sütunlar sığdıkça yan yana: 390 px'de Turlar ile İletişim iki sütun, 992'de hepsi tek satır. */
+.sb-footer__ust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  padding-block: 56px 32px;
+}
+
+.sb-footer__marka {
+  flex: 1 1 260px;
+  max-width: 360px;
+}
+
+.sb-footer__logo {
+  min-height: 44px;
+}
+
+/* Beyaz logo (396 × 158, inc/nav.php sb_beyaz_logo_html): oran korunur. */
+.sb-footer__logo-gorsel {
+  display: block;
+  width: auto;
+  height: 56px;
+}
+
+.sb-footer__tanitim {
+  margin: 16px 0 0;
+}
+
+.sb-footer__hakkimizda {
+  margin-top: 24px;
+}
+
+.sb-footer__hakkimizda p {
+  margin: 0;
+}
+
+.sb-footer__sutun,
+.sb-footer__menu {
+  flex: 1 1 140px;
+}
+
+.sb-footer__baslik {
+  margin: 0 0 8px;
+  color: var(--wp--preset--color--yuzey);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.sb-footer__liste {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sb-footer__adres {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-style: normal;
+}
+
+.sb-footer__satir {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.sb-footer__alt {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 32px;
+  padding-block: 20px 28px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  font-size: 13px;
+}
+
+.sb-footer__telif {
+  margin: 0;
+}
+
+.sb-footer__belge {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.sb-footer__yasal .sb-footer__liste {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 20px;
+}
+
+@media (min-width: 992px) {
+  .sb-footer__ust {
+    gap: 40px 56px;
+    padding-block: 64px 40px;
+  }
+}
+
+/* Ödeme logoları (iyzico başvuru şartı): koyu parçaları kaybolmasın diye beyaz kutuda; 429 × 32 oranı korunur. */
+.sb-footer__odeme-kap {
+  margin: 0;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: var(--wp--preset--color--yuzey);
+}
+
+.sb-footer__odeme {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+}
+
+/* =====================================================================
+   SAYFA BAŞLIK BANDI · KIRINTI YOLU  (Görev 8–10, spec §4.3)
+   Arşiv bandı (inc/magaza.php sb_arsiv_bandi), ürün sayfasının kırıntı bandı
+   (Görev 9) ve sepet / ödeme / Hesabım bandı (inc/hesap.php sb_hesap_bandi).
+   magaza.css'ten taşındı: ödeme ve Hesabım'da magaza.css yüklenmiyor
+   (inc/assets.php sb_stil_haritasi).
+   ===================================================================== */
+.sb-bant {
+  position: relative;
+  display: grid;
+  align-items: center;
+  min-height: 165px;
+  margin: 0 0 50px;
+  padding: 50px 0;
+  overflow: hidden;
+  text-align: center;
+  color: var(--wp--preset--color--metin);
+  background: var(--wp--preset--color--yuzey-2);
+}
+
+.sb-bant--gorselli {
+  color: #ffffff;
+}
+
+.sb-bant__gorsel {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Fotoğraf üstünde beyaz başlık okunaklı kalsın; katman tık yutmaz. */
+.sb-bant--gorselli::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+}
+
+.sb-bant__icerik {
+  position: relative;
+  z-index: 1;
+}
+
+.sb-bant__baslik {
+  margin: 0;
+  font-size: clamp(26px, 4vw, 42px);
+  font-weight: 400;
+  line-height: 1.2;
+  color: inherit;
+}
+
+@media (min-width: 992px) {
+  .sb-bant {
+    min-height: 304px;
+    margin-bottom: 90px;
+    padding: 100px 0;
+  }
+}
+
+/* Kırıntı yolu (Rank Math; do_action( 'sb_breadcrumb' ), Görev 9). Bağlantılar cümle
+   içi değil, bağımsız öğe: en az 44 px (spec §4.1). Renk bulunduğu banttan gelir;
+   fotoğraflı bantta beyaz, odak halkası da beyaz. */
+.sb-kirinti {
+  margin-top: 10px;
+  font-size: 14px;
+  line-height: 1.4;
+  letter-spacing: 0.05em;
+}
+
+.sb-kirinti p {
+  margin: 0;
+}
+
+.sb-kirinti a {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--sb-dokunma, 44px);
+  min-inline-size: var(--sb-dokunma, 44px);
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.sb-kirinti .separator {
+  padding-inline: 6px;
+}
+
+/* Fotoğraflı bantta kırıntı yolu küçük metin (14 px, AA eşiği 4,5:1): açık fotoğraf pikselinde perde (.4) yetmiyordu
+   (final review K4, en kötü 3,0:1). Satırın arkasında hafif koyu zemin: perdeyle birlikte en açık piksel (beyaz)
+   %43'e iner, beyaz metne en az 5,1:1. Başlık (büyük metin, 3:1) ve perde değişmez. Köşe yarıçapı yatay iç boşluğu
+   geçmez: satırın kutusu zeminin köşesinden taşmaz. Eksi kenar boşluğu iç boşluğu dengeler: metne kalan genişlik
+   önceki gibi kabın tamamı (390 px'te "Doğu Ekspresi" yolu tek satır kalır), zemin kabın iç boşluğuna (≥ 24 px) taşar. */
+.sb-bant--gorselli .sb-kirinti {
+  --sb-odak-rengi: #ffffff;
+  display: inline-block;
+  margin-inline: -16px;
+  padding-inline: 16px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.28);
+}
+
+/* =====================================================================
+   WC İLETİLERİ  (Görev 10, spec §4.1 kontrast, §11 #5)
+   Blocksy'nin varsayılanları AA altında: bilgi ve başarı iletisi metni
+   --theme-text-color (#747474) #F0F1F3 üstünde 4,06:1; hata iletisi beyaz metin
+   %70 saydam kırmızı üstünde ≈ 3,8:1 (blocksy/inc/dynamic-styles/global/
+   woocommerce/general.php:144-175, :218-250, :296-325; yerleşim
+   static/sass/…/woocommerce/misc/notice/legacy-notice.scss:9-30). Boş sepet, üye
+   olma hatası ve ödeme hataları bu kutularda. Blocksy değişkenleri satır içi
+   stille bizden SONRA basıyor; :root önekli seçici (0,2,0) Blocksy'nin (0,1,0)
+   seçicisini sıradan bağımsız yener (base.css html:root deseni).
+   Bilgi/başarı: #1D1F24 / #EFECE7 13,99:1. Hata: beyaz / #1D1F24 16,49:1 (Plan 2 Görev 5 paleti).
+   "Sipariş alındı" iletisi .woocommerce-message taşımaz, kendi sınıfıyla basılır
+   (woocommerce/templates/checkout/order-received.php:23); Blocksy ona da bilgi
+   iletisinin renklerini veriyor (4,14:1).
+   Mini sepetin boş durumu kendi rengini ve zeminini doğrudan veriyor
+   (.sb-mini__govde .cart-empty), etkilenmez.
+   ===================================================================== */
+:root :is(.woocommerce-info, .woocommerce-message, .woocommerce-thankyou-order-received) {
+  --theme-text-color: var(--wp--preset--color--metin);
+  --background-color: var(--wp--preset--color--yuzey-2);
+}
+
+:root .woocommerce-error {
+  --theme-text-color: var(--wp--preset--color--yuzey);
+  --background-color: var(--wp--preset--color--koyu-dolgu);
+  --sb-odak-rengi: var(--wp--preset--color--yuzey);
+}
+
+/* =====================================================================
+   ÇEREZ BİLGİLENDİRME BANDI  (Görev 11; spec §6.8, §4.1, §4.4; inc/cerez.php, cerez.js)
+   Her sayfada; bu yüzden sayfa.css'te değil (sayfa.css mağaza, ürün ve sepette yüklenmiyor,
+   inc/assets.php sb_stil_haritasi).
+   Yapışkan (sticky), fixed değil: belgenin sonunda akışa katılır, kaydırırken ekranın altında
+   durur, sayfa sonunda footer'ın ardındaki kendi yerine oturur, footer bağlantılarını örtmez.
+   Açılması görünen içeriği kaydırmaz (CLS). Blocksy'nin body { overflow-x: hidden }'ı görünüm
+   alanına aktarılıyor (html görünür): gövde kaydırma kabı değil, yapışkan konum çalışır.
+   z-index 90: header (100), menü ve filtre çekmeceleri (200), mini sepet (210) bandın üstünde.
+   Koyu dolgu + beyaz metin 16,49:1 (kontrast.mjs 'yuzey' / 'koyu-dolgu'). Geçiş yok.
+   ===================================================================== */
+.sb-cerez {
+  position: sticky;
+  bottom: 0;
+  z-index: 90;
+  background: var(--wp--preset--color--koyu-dolgu);
+  color: var(--wp--preset--color--yuzey);
+  --sb-odak-rengi: var(--wp--preset--color--yuzey);
+}
+
+.sb-cerez__ic {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 20px;
+  padding-block: 10px;
+}
+
+.sb-cerez__metin {
+  flex: 1 1 280px;
+  margin: 0;
+  font-size: var(--wp--preset--font-size--kucuk);
+  line-height: var(--sb-satir-arayuz);
+}
+
+/* Cümle içi bağlantı: koyu zeminde beyaz kalır (Blocksy'nin hover rengi aksan-koyu burada 1,6:1). */
+.sb-cerez__metin a,
+.sb-cerez__metin a:hover {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Adet kutusu ≥ 44 px (spec §4.1; Görev 12 ölçümü: sepette 40, dar ekranda 38). Blocksy yüksekliği
+   --quantity-height'tan ve dar ekranda (0,4,0) özgüllükle veriyor (woocommerce.min.css
+   `.cart_item .product-mobile-actions .quantity[data-type=type-2]`); değişkenin kendisi ezilir. */
+.quantity[data-type] {
+  --quantity-height: var(--sb-dokunma) !important;
+}
+
+/* İndirim gösterimi (Plan 2 Görev 8, spec §6.3): Blocksy üstü çizili fiyatı %70 opaklıkla basıyordu
+   (etkin kontrast AA altı); referans fiyat tam opak. İndirim tarihleri fiyatın altında ayrı satırda. */
+.price del {
+	opacity: 1;
+}
+
+.sb-indirim-tarihi {
+	display: block;
+	margin-top: 4px;
+	font-size: 0.875rem;
+}

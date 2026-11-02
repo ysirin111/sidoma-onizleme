@@ -1,0 +1,1578 @@
+/* ==========================================================================
+   Tur sayfası — template-parts/tur/detay.php, secim.php, bolumler.php (Plan 2 Görev 8; spec §8)
+   sb_stil_haritasi() tur sayfasında urun.css yerine yükler; tur kartı, rozetler ve benzer turlar şeridi
+   magaza.css'te. Onaylı taslakta detay sayfası yok: paleti, beyaz kartları (1 px çizgi, 18 px köşe), rozetleri ve
+   kırmızı çağrı düğmesi genişletildi. Sayfa zemini `zemin` (#F6F4F1), kartlar `yuzey` (beyaz).
+   Düzen: < 1024 px tek sütun (galeri, başlık, seçim kutusu, bölümler) ve altta yapışkan çubuk. ≥ 1024 px masaüstü
+   tasarımı (owner 2026-10-25, .superpowers/sdd/2026-10-25-tur-detay; mobil görünüm değişmez, bütün farklar
+   `@media (min-width: 1024px)` altında): üstte tam genişlik fotoğraf mozaiği; altında sol sütun (ortalı rozet satırı ve
+   H1, zemin üstünde çizgi başlıklı bölümler) ve ince dikey çizgiyle ayrılmış, yapışkan sağ sütun (fiyat kartı = seçim
+   kutusu; acente kartı owner 2026-11-01'de kalktı).
+   Kontrast (beyaz ve açık zeminde): metin #1D1F24, gövde #4A4E57, ikincil #6B6F78 ≥ 4,5:1; kırmızı fiyat büyük
+   metin; "Müsait" koyulaştırılmış yeşil (anasayfa durum yazısıyla aynı karışım), "Son N koltuk" koyu kırmızı.
+   ========================================================================== */
+
+/* Çapa hedefleri (#sb-tur-secim, #sb-tum-kalkislar) ve klavye odağı yapışkan header'ın altında; mobilde alt çubuğun
+   üstünde kalır (çubuk sayfanın altını örter). */
+html {
+	scroll-padding-top: calc(var(--sb-header-yuk) + 16px);
+}
+
+@media (max-width: 1023px) {
+	html {
+		scroll-padding-bottom: 96px;
+	}
+}
+
+/* ---------- Kırıntı ve düzen ---------- */
+.sb-tur__kirinti {
+	padding-block: 6px 2px;
+	color: var(--wp--preset--color--metin-ikincil);
+}
+
+.sb-tur__kirinti .sb-kirinti {
+	margin-top: 0;
+}
+
+.sb-tur__duzen {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: 20px;
+	padding-block: 8px 48px;
+}
+
+/* ≥ 1024 px: mozaik tam genişlik; altında sol sütun, 1 px çizgi (::before, iki satır boyu) ve sağ sütun. */
+@media (min-width: 1024px) {
+	.sb-tur__duzen {
+		grid-template-columns: minmax(0, 1fr) 1px 340px;
+		grid-template-areas:
+			"galeri galeri galeri"
+			"bas cizgi sag"
+			"bolumler cizgi sag";
+		grid-template-rows: auto auto 1fr;
+		column-gap: 32px;
+		row-gap: 40px;
+		padding-block: 12px 64px;
+	}
+
+	.sb-tur__duzen::before {
+		content: "";
+		grid-area: cizgi;
+		background: var(--wp--preset--color--kenarlik);
+	}
+
+	.sb-tur-galeri {
+		grid-area: galeri;
+	}
+
+	.sb-tur__bas {
+		grid-area: bas;
+	}
+
+	.sb-tur__bolumler {
+		grid-area: bolumler;
+	}
+}
+
+@media (min-width: 1280px) {
+	.sb-tur__duzen {
+		grid-template-columns: minmax(0, 1fr) 1px 400px;
+		column-gap: 48px;
+	}
+}
+
+/* ---------- Galeri: 16:10 ana görsel, altında yatay küçük görsel şeridi (urun-galeri.js) ---------- */
+.sb-tur-galeri {
+	display: grid;
+	gap: 12px;
+	min-width: 0;
+}
+
+.sb-tur-galeri__sahne {
+	position: relative;
+	aspect-ratio: 16 / 10;
+	overflow: hidden;
+	border-radius: var(--sb-kart-radius, 18px);
+	background: var(--wp--preset--color--yuzey-2);
+}
+
+.sb-tur-galeri__sahne .sb-tur-galeri__ana {
+	position: absolute;
+	inset: 0;
+	inline-size: 100%;
+	block-size: 100%;
+	margin: 0;
+	object-fit: cover;
+}
+
+.sb-tur-galeri__sahne > .sb-bilgi {
+	position: absolute;
+	inset-inline: 12px;
+	inset-block-end: 12px;
+}
+
+.sb-tur-galeri__ok {
+	position: absolute;
+	inset-block-start: 50%;
+	display: inline-grid;
+	place-items: center;
+	inline-size: 44px;
+	block-size: 44px;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: var(--wp--preset--color--yuzey);
+	box-shadow: 0 2px 10px rgba(29, 31, 36, 0.18);
+	color: var(--wp--preset--color--metin);
+	font-size: 1.125rem;
+	cursor: pointer;
+	transform: translateY(-50%);
+	transition: background-color var(--sb-sure-hizli, 0.2s), color var(--sb-sure-hizli, 0.2s);
+}
+
+.sb-tur-galeri__ok[hidden] {
+	display: none;
+}
+
+.sb-tur-galeri__ok--geri {
+	inset-inline-start: 12px;
+}
+
+.sb-tur-galeri__ok--ileri {
+	inset-inline-end: 12px;
+}
+
+.sb-tur-galeri__ok:hover {
+	background: var(--wp--preset--color--aksan);
+	color: var(--wp--preset--color--aksan-uzeri);
+}
+
+.sb-tur-galeri__kucukler {
+	display: flex;
+	gap: 10px;
+	overflow-x: auto;
+	scrollbar-width: thin;
+}
+
+.sb-tur-galeri__kucukler[hidden] {
+	display: none;
+}
+
+.sb-tur-galeri__kucuk {
+	flex: 0 0 auto;
+	inline-size: 72px;
+	aspect-ratio: 1;
+	padding: 0;
+	border: 2px solid transparent;
+	border-radius: 12px;
+	overflow: hidden;
+	background: var(--wp--preset--color--yuzey-2);
+	cursor: pointer;
+	transition: border-color var(--sb-sure-hizli, 0.2s);
+}
+
+.sb-tur-galeri__kucuk:hover,
+.sb-tur-galeri__kucuk[aria-current="true"] {
+	border-color: var(--wp--preset--color--aksan);
+}
+
+.sb-tur-galeri__kucuk img {
+	display: block;
+	inline-size: 100%;
+	block-size: 100%;
+	object-fit: cover;
+}
+
+/* Şerit bir kaydırma kabı: odak halkası öğenin içine çizilir (kırpılmaz; urun.css küçük görsel dersi). */
+.sb-tur-galeri__kucukler .sb-tur-galeri__kucuk:focus-visible {
+	outline-offset: -4px;
+}
+
+@media (min-width: 768px) {
+	.sb-tur-galeri__kucuk {
+		inline-size: 88px;
+	}
+}
+
+/* Küçük görselin <picture>'ı kutu üretmez: görsel düğmenin doğrudan içeriği (mobil düzen <picture>'sız halle aynı). */
+.sb-tur-galeri__kucuk picture {
+	display: contents;
+}
+
+/* "Tüm Fotoğraflar (N)": yalnız masaüstü mozaiğinde. */
+.sb-tur-galeri__tum {
+	display: none;
+}
+
+/* ≥ 1024 px fotoğraf mozaiği: kapak solda (2fr), şeridin sıradaki dört görseli sağda 2×2 (1fr 1fr), aralık 8 px,
+   1440'ta 460 px; dış köşeler 18 px (kap kırpar), iç köşeler düz. Şerit kutu üretmez (display: contents), düğmeleri
+   ızgaranın hücreleri; ilk düğme kapağın kendisi, altıncıdan sonrası "Tüm Fotoğraflar" penceresinde. Az görselde
+   boşluk kalmaz (sb-tur-galeri--adet-N): 1 tam genişlik, 2 yarı yarıya, 3 sağda iki görsel alt alta, 4 sağda üstte iki,
+   altta bir geniş. Oklar yok; görsele tık galeri penceresini açar (urun-galeri.js, --pencereli). */
+@media (min-width: 1024px) {
+	.sb-tur-galeri {
+		position: relative;
+		grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr);
+		grid-template-rows: repeat(2, minmax(0, 1fr));
+		gap: 8px;
+		block-size: clamp(340px, 32vw, 460px);
+		overflow: hidden;
+		border-radius: var(--sb-kart-radius, 18px);
+	}
+
+	.sb-tur-galeri--adet-0,
+	.sb-tur-galeri--adet-1 {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.sb-tur-galeri__sahne {
+		grid-row: 1 / 3;
+		grid-column: 1;
+		aspect-ratio: auto;
+		border-radius: 0;
+	}
+
+	.sb-tur-galeri__ok {
+		display: none;
+	}
+
+	/* Kutu yok: mobildeki yatay kaydırma kabı burada kırpmaz (odak halkası denetimi ataları tarar, kalite.mjs). */
+	.sb-tur-galeri__kucukler {
+		display: contents;
+		overflow: visible;
+	}
+
+	.sb-tur-galeri__kucuk {
+		inline-size: auto;
+		aspect-ratio: auto;
+		border: 0;
+		border-radius: 0;
+	}
+
+	.sb-tur-galeri__kucuk:first-child,
+	.sb-tur-galeri__kucuk:nth-child(n + 6) {
+		display: none;
+	}
+
+	.sb-tur-galeri--adet-2 .sb-tur-galeri__kucuk {
+		grid-row: 1 / 3;
+		grid-column: 2 / 4;
+	}
+
+	.sb-tur-galeri--adet-3 .sb-tur-galeri__kucuk,
+	.sb-tur-galeri--adet-4 .sb-tur-galeri__kucuk:nth-child(4) {
+		grid-column: 2 / 4;
+	}
+
+	.sb-tur-galeri__kucuk img {
+		transition: transform var(--sb-sure, 0.3s) ease;
+	}
+
+	.sb-tur-galeri--pencereli :is(.sb-tur-galeri__sahne, .sb-tur-galeri__kucuk) {
+		cursor: zoom-in;
+	}
+
+	.sb-tur-galeri--pencereli .sb-tur-galeri__kucuk:hover img {
+		transform: scale(1.03);
+	}
+
+	.sb-tur-galeri__tum {
+		position: absolute;
+		inset-inline-end: 16px;
+		inset-block-end: 16px;
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		min-block-size: var(--sb-dokunma, 44px);
+		padding: 0 16px;
+		border-radius: 10px;
+		background: var(--wp--preset--color--yuzey);
+		box-shadow: 0 4px 14px rgba(29, 31, 36, 0.15);
+		color: var(--wp--preset--color--metin);
+		font-size: 14px;
+		font-weight: 600;
+		line-height: 1.2;
+		text-decoration: none;
+	}
+
+	.sb-tur-galeri__tum:hover {
+		background: var(--wp--preset--color--yuzey-2);
+	}
+
+	/* JS'siz hali: "Tüm Fotoğraflar" çapası (#sb-tur-fotograflar) şeridi hedefler; o zaman mozaik yerine bütün
+	   görseller dörtlü ızgarada (kapak şeridin ilk görseli olarak). */
+	.sb-tur-galeri:has(> #sb-tur-fotograflar:target:not([hidden])) {
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		grid-template-rows: none;
+		block-size: auto;
+	}
+
+	.sb-tur-galeri:has(> #sb-tur-fotograflar:target:not([hidden])) :is(.sb-tur-galeri__sahne, .sb-tur-galeri__tum) {
+		display: none;
+	}
+
+	.sb-tur-galeri:has(> #sb-tur-fotograflar:target:not([hidden])) .sb-tur-galeri__kucuk {
+		display: block;
+		grid-row: auto;
+		grid-column: auto;
+		aspect-ratio: 4 / 3;
+	}
+}
+
+@media (min-width: 1024px) and (prefers-reduced-motion: reduce) {
+	.sb-tur-galeri__kucuk img {
+		transition: none;
+	}
+}
+
+/* ---------- Başlık bloğu: rozetler, H1, çıkış özeti ---------- */
+.sb-tur__bas {
+	display: grid;
+	gap: 10px;
+	min-width: 0;
+}
+
+.sb-tur__rozetler {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+/* Süre: beyaz rozet, zeminde ayrışsın diye çizgili. Yurt dışı: açık gri zeminde mürekkep. */
+.sb-rozet--sure {
+	box-shadow: inset 0 0 0 1px var(--wp--preset--color--kenarlik);
+}
+
+.sb-rozet--yurtdisi {
+	color: var(--wp--preset--color--metin);
+	background: var(--wp--preset--color--yuzey-2);
+}
+
+.sb-tur__ad {
+	margin: 0;
+	color: var(--wp--preset--color--metin);
+	font-size: clamp(1.625rem, 1.25rem + 1.2vw, 2.25rem);
+	font-weight: 800;
+	line-height: 1.2;
+	letter-spacing: -0.02em;
+	text-transform: none;
+	overflow-wrap: anywhere;
+}
+
+.sb-tur__cikis {
+	margin: 0;
+	color: var(--wp--preset--color--metin-ikincil);
+	font-size: 15px;
+	line-height: 1.5;
+}
+
+/* Canlıdaki saat aralığı ve alt başlık satırları (H1'in altında). Saat aralığının her satırı ayrı satır. */
+.sb-tur__saat,
+.sb-tur__alt-baslik {
+	margin: 0;
+	color: var(--wp--preset--color--metin-govde);
+	font-size: 15px;
+	font-weight: 600;
+	line-height: 1.5;
+	overflow-wrap: anywhere;
+}
+
+.sb-tur__saat span {
+	display: block;
+}
+
+/* Konum simgesi yalnız masaüstündeki rozet satırında. */
+.sb-tur__cikis .sb-ikon {
+	display: none;
+}
+
+/* ≥ 1024 px: rozetler ve simgeli çıkış özeti tek satırda, altında büyük H1; hepsi ortalı (kayıtlı ad olduğu gibi). */
+@media (min-width: 1024px) {
+	.sb-tur__bas {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: center;
+		gap: 10px 14px;
+		text-align: center;
+	}
+
+	.sb-tur__rozetler {
+		justify-content: center;
+	}
+
+	.sb-tur__cikis {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		font-size: 13px;
+	}
+
+	.sb-tur__cikis .sb-ikon {
+		display: block;
+		flex: 0 0 auto;
+		inline-size: 16px;
+		block-size: 16px;
+	}
+
+	.sb-tur__ad {
+		order: 1;
+		flex: 1 0 100%;
+		margin-top: 2px;
+		font-size: 44px;
+		font-weight: 500;
+		line-height: 1.15;
+		letter-spacing: -0.01em;
+	}
+
+	.sb-tur__saat,
+	.sb-tur__alt-baslik {
+		order: 2;
+		flex: 1 0 100%;
+	}
+}
+
+/* ---------- Seçim kutusu (#sb-tur-secim) ---------- */
+.sb-tur-secim {
+	box-sizing: border-box;
+	min-width: 0;
+	padding: 22px;
+	border: 1px solid var(--wp--preset--color--kenarlik);
+	border-radius: var(--sb-kart-radius, 18px);
+	background: var(--wp--preset--color--yuzey);
+	box-shadow: 0 10px 28px rgba(29, 31, 36, 0.06);
+}
+
+/* ≥ 1024 px sağ sütun (seçim kutusu) yapışkan; ekrandan uzunsa sütun kendi içinde kayar (alt kısmı
+   ulaşılmaz kalmasın; takvim.js seçimden sonra çağrı düğmesini bu kapta gösterir). Kartlar beyaz, ince çerçeve,
+   18 px köşe, aralarında 18 px. */
+@media (min-width: 1024px) {
+	.sb-tur__sag {
+		position: sticky;
+		top: calc(var(--sb-header-yuk) + 24px);
+		grid-area: sag;
+		align-self: start;
+		display: grid;
+		gap: 18px;
+		max-block-size: calc(100vh - var(--sb-header-yuk) - 48px);
+		overflow-y: auto;
+	}
+
+	.sb-tur-secim {
+		padding: 28px;
+		box-shadow: none;
+	}
+}
+
+.sb-tur-secim__fiyat {
+	margin: 0 0 16px;
+	color: var(--wp--preset--color--metin-ikincil);
+	font-size: 14px;
+	line-height: 1.3;
+}
+
+.sb-tur-secim__tutar {
+	color: var(--wp--preset--color--aksan);
+	font-size: 28px;
+	font-weight: 800;
+	letter-spacing: -0.01em;
+}
+
+.sb-tur-secim__baslik {
+	margin: 0 0 8px;
+	color: var(--wp--preset--color--metin);
+	font-size: 13px;
+	font-weight: 700;
+	line-height: 1.5;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+}
+
+/* Fiyat kartının alt satırı ve masaüstü telefon düğmesi kabı yalnız ≥ 1024 px (açık kipteki düğme kabı aşağıdaki
+   .sb-tur-secim__dugmeler kuralını ezmek için kutu sınıfıyla). */
+.sb-tur-secim__sonraki,
+.sb-tur-secim .sb-tur-secim__dugmeler--genis {
+	display: none;
+}
+
+/* Tarih ve kampanya satırları (canlıdaki gibi fiyatın üstünde): küçük, kalın, satır satır; ≥ 1024 px ortalı. */
+.sb-tur-secim__tarih-notu {
+	display: grid;
+	gap: 4px;
+	margin: 0 0 12px;
+}
+
+.sb-tur-secim__tarih-notu p {
+	margin: 0;
+	color: var(--wp--preset--color--aksan);
+	font-size: 14px;
+	font-weight: 700;
+	line-height: 1.4;
+	overflow-wrap: anywhere;
+}
+
+/* ≥ 1024 px fiyat kartı: ortalı küçük "TUR ÜCRETİ :" etiketi (fiyat satırının etiketi üste alınır), büyük fiyat, alt
+   satır; düğmeler tam genişlik (birincil dolu kırmızı, ikincil çerçeveli "Bizi arayın"). Kalkışsız turda "Tarihler
+   yakında" başlığı yalnız ekran okuyucuda (alt satır aynı şeyi söylüyor; kutunun adı olarak kalır). */
+@media (min-width: 1024px) {
+	.sb-tur-secim__fiyat {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 4px;
+		margin: 0;
+		color: var(--wp--preset--color--metin);
+		font-size: 22px;
+		font-weight: 700;
+		line-height: 1.3;
+		text-align: center;
+	}
+
+	.sb-tur-secim__tarih-notu {
+		margin-bottom: 16px;
+		text-align: center;
+	}
+
+	.sb-tur-secim__etiket {
+		order: -1;
+		color: var(--wp--preset--color--metin-ikincil);
+		font-size: 12px;
+		font-weight: 500;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+	}
+
+	.sb-tur-secim__tutar {
+		color: var(--wp--preset--color--metin);
+		font-size: 44px;
+		font-weight: 700;
+		line-height: 1.15;
+	}
+
+	.sb-tur-secim__sonraki {
+		display: block;
+		margin: 4px 0 20px;
+		color: var(--wp--preset--color--metin-ikincil);
+		font-size: 13px;
+		line-height: 1.5;
+		text-align: center;
+	}
+
+	.sb-tur-secim:not([data-sb-takvim]) .sb-tur-secim__baslik {
+		position: absolute;
+		inline-size: 1px;
+		block-size: 1px;
+		margin: -1px;
+		padding: 0;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+	}
+
+	.sb-tur-secim .sb-tur-secim__dugmeler--genis {
+		display: grid;
+		margin-top: 10px;
+	}
+}
+
+/* Telefon satırı ortalı; numara bölünmez, dar kutuda "REZERVASYON İÇİN :" ile numara iki satıra ayrılır. */
+.sb-tur-secim__telefon {
+	flex-wrap: wrap;
+	justify-content: center;
+	column-gap: 0.4em;
+	text-align: center;
+}
+
+.sb-tur-secim__telefon-no {
+	white-space: nowrap;
+}
+
+.sb-tur-secim__alt-baslik {
+	margin: 18px 0 10px;
+	color: var(--wp--preset--color--metin);
+	font-size: 17px;
+	font-weight: 800;
+	line-height: 1.3;
+	letter-spacing: -0.01em;
+	text-transform: none;
+}
+
+.sb-tur-secim__not {
+	margin: 0;
+	color: var(--wp--preset--color--metin-govde);
+	font-size: 15px;
+	line-height: 1.6;
+}
+
+/* Kalkış listesi (seçim kutusu ve tüm kalkışlar bölümü). */
+.sb-kalkislar {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.sb-kalkis {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	gap: 2px 12px;
+	padding: 9px 0;
+	border-top: 1px solid var(--wp--preset--color--kenarlik);
+	font-size: 14px;
+	line-height: 1.4;
+}
+
+.sb-kalkis__tarih {
+	color: var(--wp--preset--color--metin);
+}
+
+.sb-kalkis__durum {
+	flex: 0 0 auto;
+	font-weight: 700;
+	white-space: nowrap;
+}
+
+.sb-kalkis--musait .sb-kalkis__durum {
+	color: color-mix(in srgb, var(--wp--preset--color--basari) 78%, #000);
+}
+
+.sb-kalkis--son-koltuklar .sb-kalkis__durum {
+	color: var(--wp--preset--color--aksan-koyu);
+}
+
+.sb-kalkis--dolu :is(.sb-kalkis__tarih, .sb-kalkis__durum),
+.sb-kalkis--kapali :is(.sb-kalkis__tarih, .sb-kalkis__durum) {
+	color: var(--wp--preset--color--metin-ikincil);
+}
+
+.sb-tur-secim__tum {
+	display: inline-flex;
+	align-items: center;
+	min-block-size: var(--sb-dokunma, 44px);
+	color: var(--wp--preset--color--metin);
+	font-size: 14px;
+	font-weight: 700;
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+
+/* Form ve kapalı görünümün denetimleri: Blocksy'nin alan görünümü (44 px, 12 px köşe; base.css), tam genişlik. */
+.sb-tur-form,
+.sb-tur-secim__alanlar {
+	display: grid;
+	gap: 12px;
+	margin-top: 16px;
+}
+
+.sb-tur-alan {
+	display: grid;
+	gap: 6px;
+}
+
+.sb-tur-alan__etiket {
+	color: var(--wp--preset--color--metin);
+	font-size: 13px;
+	font-weight: 700;
+	line-height: 1.4;
+}
+
+.sb-tur-alan__secim {
+	box-sizing: border-box;
+	inline-size: 100%;
+	max-inline-size: 100%;
+}
+
+.sb-tur-form__dugme,
+.sb-tur-secim__dugmeler .sb-btn {
+	inline-size: 100%;
+	padding-inline: 16px;
+}
+
+.sb-tur-form__dugme {
+	margin-top: 4px;
+}
+
+.sb-tur-secim__dugmeler {
+	display: grid;
+	gap: 10px;
+	margin-top: 16px;
+}
+
+/* Takvimin gizlediği liste ve alanlar (takvim.js `hidden`); kendi display kuralı olan öğelerde de geçerli. */
+.sb-tur-secim [hidden] {
+	display: none;
+}
+
+/* ---------- Kalkış takvimi (Plan 2 Görev 9; assets/js/takvim.js) ----------
+   Yalnız JS'le kurulur; JS'siz hali yukarıdaki kalkış listesi ve form. Gün hücresi 44 px yükseklikte, ızgara kutunun
+   iç boşluğuna 12 px taşar: hücre genişliği 390 px'te 45,7, 1024'te 44,3, 1280 ve üstünde 50 px (dokunma hedefi ≥ 44,
+   kalite.mjs); 320 px'te kutuda 35,7, alt sayfada 42,3 px (WCAG 2.5.8'in 24 px'inin üstünde). Görünür boşluk
+   düğmenin saydam kenarlığıdır, tık alanı hücrenin tamamı. Renkler (kontrast ≥ 4,5:1): müsait açık yeşil zeminde
+   koyu yeşil (5,5:1), son koltuk #FDECEC'te #B5161C ve altında nokta, seçili kırmızıda beyaz (5,0:1), dolu ve
+   kapanmış gri zeminde üstü çizili (7,1:1; renk tek ipucu değil). */
+.sb-takvim {
+	--sb-takvim-yesil: color-mix(in srgb, var(--wp--preset--color--basari) 78%, #000);
+	margin-top: 4px;
+}
+
+.sb-takvim__ust {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	margin-bottom: 6px;
+}
+
+.sb-takvim__ay {
+	flex: 1 1 auto;
+	margin: 0;
+	color: var(--wp--preset--color--metin);
+	font-size: 16px;
+	font-weight: 800;
+	line-height: 1.3;
+	text-align: center;
+}
+
+.sb-takvim__ok,
+.sb-takvim__sayac-dugme,
+.sb-tur-sayfa__kapat {
+	display: inline-grid;
+	flex: 0 0 auto;
+	place-items: center;
+	box-sizing: border-box;
+	inline-size: var(--sb-dokunma, 44px);
+	block-size: var(--sb-dokunma, 44px);
+	margin: 0;
+	padding: 0;
+	border: 1px solid var(--wp--preset--color--kenarlik);
+	border-radius: 50%;
+	background: var(--wp--preset--color--yuzey);
+	color: var(--wp--preset--color--metin);
+	font-family: inherit;
+	font-size: 18px;
+	font-weight: 700;
+	line-height: 1;
+	cursor: pointer;
+	transition: background-color var(--sb-sure-hizli, 0.2s), border-color var(--sb-sure-hizli, 0.2s);
+}
+
+.sb-takvim__ok:not([aria-disabled="true"]):hover,
+.sb-takvim__sayac-dugme:not([aria-disabled="true"]):hover {
+	border-color: var(--wp--preset--color--aksan);
+}
+
+/* Pasif düğme odakta kalır (serit.js deseni); soluk görünür. */
+.sb-takvim__ok[aria-disabled="true"],
+.sb-takvim__sayac-dugme[aria-disabled="true"] {
+	cursor: default;
+	opacity: 0.4;
+}
+
+.sb-takvim__izgara {
+	inline-size: calc(100% + 24px);
+	max-inline-size: none;
+	margin: 0 -12px;
+	border: 0;
+	border-collapse: collapse;
+	table-layout: fixed;
+}
+
+.sb-takvim__izgara :is(th, td) {
+	padding: 0;
+	border: 0;
+	background: none;
+	text-align: center;
+	vertical-align: middle;
+}
+
+.sb-takvim__izgara th {
+	padding-block: 4px 6px;
+	color: var(--wp--preset--color--metin-ikincil);
+	font-size: 12px;
+	font-weight: 700;
+	line-height: 1.4;
+}
+
+.sb-takvim__izgara abbr {
+	text-decoration: none;
+	cursor: default;
+}
+
+.sb-takvim__gun,
+.sb-takvim__bos {
+	display: grid;
+	place-items: center;
+	box-sizing: border-box;
+	inline-size: 100%;
+	block-size: 44px;
+	font-size: 15px;
+	line-height: 1;
+}
+
+.sb-takvim__bos {
+	color: var(--wp--preset--color--metin-ikincil);
+}
+
+.sb-takvim__gun {
+	position: relative;
+	margin: 0;
+	padding: 0;
+	border: 3px solid transparent;
+	border-radius: 14px;
+	background-clip: padding-box;
+	font-family: inherit;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.sb-takvim__gun--musait {
+	background-color: color-mix(in srgb, var(--wp--preset--color--basari) 12%, #fff);
+	color: var(--sb-takvim-yesil);
+}
+
+.sb-takvim__gun--son-koltuklar {
+	background-color: var(--wp--preset--color--aksan-acik);
+	color: var(--wp--preset--color--aksan-koyu);
+}
+
+.sb-takvim__gun--son-koltuklar::after {
+	content: "";
+	position: absolute;
+	inset-block-end: 5px;
+	inset-inline-start: 50%;
+	inline-size: 4px;
+	block-size: 4px;
+	border-radius: 50%;
+	background: currentcolor;
+	transform: translateX(-50%);
+}
+
+.sb-takvim__gun--dolu,
+.sb-takvim__gun--kapali {
+	background-color: var(--wp--preset--color--yuzey-2);
+	color: var(--wp--preset--color--metin-govde);
+	font-weight: 500;
+	text-decoration: line-through;
+	cursor: not-allowed;
+}
+
+.sb-takvim__gun:not([aria-disabled="true"]):hover {
+	box-shadow: inset 0 0 0 2px currentcolor;
+}
+
+.sb-takvim__gun[aria-pressed="true"] {
+	background-color: var(--wp--preset--color--aksan);
+	color: var(--wp--preset--color--aksan-uzeri);
+}
+
+/* Gösterge: hücrelerle aynı örnekler. */
+.sb-takvim__gosterge {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px 12px;
+	margin: 8px 0 0;
+	padding: 0;
+	list-style: none;
+	color: var(--wp--preset--color--metin-govde);
+	font-size: 12.5px;
+	line-height: 1.4;
+}
+
+.sb-takvim__gosterge-oge {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+}
+
+.sb-takvim__ornek {
+	inline-size: 14px;
+	block-size: 14px;
+	border-radius: 4px;
+}
+
+.sb-takvim__ornek--musait {
+	background: color-mix(in srgb, var(--wp--preset--color--basari) 12%, #fff);
+	box-shadow: inset 0 0 0 1px var(--sb-takvim-yesil);
+}
+
+.sb-takvim__ornek--son-koltuklar {
+	background: var(--wp--preset--color--aksan-acik);
+	box-shadow: inset 0 0 0 1px var(--wp--preset--color--aksan-koyu);
+}
+
+.sb-takvim__ornek--dolu {
+	background: linear-gradient(to bottom, transparent 6px, var(--wp--preset--color--metin-govde) 6px 8px, transparent 8px) var(--wp--preset--color--yuzey-2);
+}
+
+/* Özet: ipucu ya da seçilen kalkış, kişi sayacı, toplam. */
+.sb-takvim__ozet {
+	margin-top: 12px;
+	padding-top: 12px;
+	border-top: 1px solid var(--wp--preset--color--kenarlik);
+}
+
+.sb-takvim__ipucu {
+	margin: 0;
+	color: var(--wp--preset--color--metin-govde);
+	font-size: 14px;
+	line-height: 1.5;
+}
+
+.sb-takvim__secim {
+	display: grid;
+	gap: 6px;
+	margin: 0;
+}
+
+.sb-takvim__satir {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	gap: 2px 12px;
+	font-size: 14px;
+	line-height: 1.45;
+}
+
+.sb-takvim__satir dt {
+	color: var(--wp--preset--color--metin-ikincil);
+	font-weight: 500;
+}
+
+.sb-takvim__satir dd {
+	margin: 0;
+	color: var(--wp--preset--color--metin);
+	font-weight: 700;
+	text-align: end;
+}
+
+/* Biniş saatleri etiketin altında satır içi liste ("Rize 08:00 · Çayeli 08:30 · …"); ayraç satır sonunda kalır. */
+.sb-takvim__satir--binis {
+	display: block;
+}
+
+.sb-takvim__satir--binis dd {
+	margin-top: 2px;
+	text-align: start;
+}
+
+.sb-takvim__binis {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	overflow-wrap: anywhere;
+}
+
+.sb-takvim__binis li {
+	display: inline;
+}
+
+.sb-takvim__binis li:not(:last-child)::after {
+	content: " · " / "";
+	color: var(--wp--preset--color--metin-ikincil);
+}
+
+.sb-takvim__binis-saat {
+	color: var(--wp--preset--color--metin-govde);
+	font-weight: 600;
+}
+
+.sb-takvim__kisi {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	margin-top: 8px;
+}
+
+.sb-takvim__kisi-etiket {
+	color: var(--wp--preset--color--metin);
+	font-size: 14px;
+	font-weight: 700;
+}
+
+.sb-takvim__sayac {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.sb-takvim__kisi-sayi {
+	min-inline-size: 2.5ch;
+	color: var(--wp--preset--color--metin);
+	font-size: 18px;
+	font-weight: 800;
+	text-align: center;
+}
+
+.sb-takvim__toplam {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 12px;
+	margin: 8px 0 0;
+	color: var(--wp--preset--color--metin-ikincil);
+	font-size: 14px;
+	line-height: 1.3;
+}
+
+.sb-takvim__tutar {
+	color: var(--wp--preset--color--metin);
+	font-size: 20px;
+	font-weight: 800;
+}
+
+/* ---------- Mobil alt sayfa (≤ 1023 px; takvim.js <dialog>) ----------
+   Ekranın altına yaslı, tam genişlik; içerik uzunsa kendi içinde kayar. Açıkken arkadaki sayfa kaymaz. */
+.sb-tur-sayfa {
+	box-sizing: border-box;
+	inline-size: 100%;
+	max-inline-size: none;
+	max-block-size: calc(100vh - 24px);
+	max-block-size: calc(100dvh - 24px);
+	margin: auto 0 0;
+	padding: 0;
+	border: 0;
+	border-radius: var(--sb-kart-radius, 18px) var(--sb-kart-radius, 18px) 0 0;
+	background: var(--wp--preset--color--yuzey);
+	color: var(--wp--preset--color--metin);
+	box-shadow: 0 -10px 30px rgba(29, 31, 36, 0.18);
+	overflow-y: auto;
+	overscroll-behavior: contain;
+}
+
+.sb-tur-sayfa::backdrop {
+	background: rgba(29, 31, 36, 0.5);
+}
+
+html:has(.sb-tur-sayfa[open]) {
+	overflow: hidden;
+}
+
+.sb-tur-sayfa__bas {
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	display: flex;
+	justify-content: flex-end;
+	padding: 8px 12px 0;
+	background: var(--wp--preset--color--yuzey);
+}
+
+.sb-tur-sayfa__kapat {
+	font-size: 24px;
+	font-weight: 500;
+}
+
+.sb-tur-sayfa .sb-tur-secim {
+	padding: 0 var(--sb-kenar) calc(24px + env(safe-area-inset-bottom, 0px));
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.sb-tur-sayfa[open] {
+		animation: sb-tur-sayfa-gir 0.25s ease-out;
+	}
+}
+
+@keyframes sb-tur-sayfa-gir {
+	from {
+		transform: translateY(100%);
+	}
+}
+
+/* ---------- İçerik bölümleri ---------- */
+.sb-tur__bolumler {
+	display: grid;
+	gap: 16px;
+	min-width: 0;
+}
+
+.sb-tur-bolum,
+.sb-tur-soru {
+	box-sizing: border-box;
+	min-width: 0;
+	padding: 22px 20px;
+	border: 1px solid var(--wp--preset--color--kenarlik);
+	border-radius: var(--sb-kart-radius, 18px);
+	background: var(--wp--preset--color--yuzey);
+}
+
+@media (min-width: 768px) {
+	.sb-tur-bolum,
+	.sb-tur-soru {
+		padding: 28px 32px;
+	}
+}
+
+.sb-tur-bolum__baslik {
+	margin: 0 0 14px;
+	color: var(--wp--preset--color--metin);
+	font-size: 20px;
+	font-weight: 800;
+	line-height: 1.25;
+	letter-spacing: -0.01em;
+	text-transform: none;
+}
+
+.sb-tur-bolum__metin,
+.sb-tur-program__giris,
+.sb-tur-gun__metin p,
+.sb-tur-bolum__icerik {
+	margin: 0;
+	color: var(--wp--preset--color--metin-govde);
+	font-size: 15.5px;
+	line-height: 1.75;
+	overflow-wrap: anywhere;
+}
+
+.sb-tur-bolum__alt-baslik {
+	margin: 18px 0 6px;
+	color: var(--wp--preset--color--metin);
+	font-size: 16px;
+	font-weight: 800;
+	line-height: 1.35;
+	text-transform: none;
+}
+
+.sb-tur-bolum__alt-baslik:first-child {
+	margin-top: 0;
+}
+
+.sb-tur-bolum__icerik > :first-child {
+	margin-top: 0;
+}
+
+.sb-tur-bolum__icerik > :last-child {
+	margin-bottom: 0;
+}
+
+/* Gürcistan sigorta uyarısı (AR-10): "Uyarılar" bölümünün başında; hap tonlarıyla çevreden ayrışır, düzen her genişlikte aynı. */
+.sb-tur-gurcistan {
+	margin: 0 0 14px;
+	padding: 14px 16px;
+	border: 1px solid var(--wp--preset--color--hap-metin);
+	border-radius: 10px;
+	background: var(--wp--preset--color--hap);
+	color: var(--wp--preset--color--hap-metin);
+}
+
+.sb-tur-gurcistan:last-child {
+	margin-bottom: 0;
+}
+
+.sb-tur-gurcistan__baslik {
+	margin: 0 0 6px;
+	font-size: 16px;
+	font-weight: 800;
+	line-height: 1.3;
+}
+
+.sb-tur-gurcistan__metin {
+	margin: 0;
+	font-size: 15px;
+	line-height: 1.65;
+}
+
+/* Program: gün başına <details>; JS'siz çalışır, ilk gün sunucudan açık. */
+.sb-tur-program__giris {
+	margin-bottom: 14px;
+}
+
+.sb-tur-gun {
+	border-top: 1px solid var(--wp--preset--color--kenarlik);
+}
+
+.sb-tur-gun:last-child {
+	border-bottom: 1px solid var(--wp--preset--color--kenarlik);
+}
+
+.sb-tur-gun__baslik {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	min-block-size: 48px;
+	padding: 8px 0;
+	color: var(--wp--preset--color--metin);
+	font-size: 16px;
+	font-weight: 700;
+	line-height: 1.4;
+	cursor: pointer;
+	list-style: none;
+}
+
+.sb-tur-gun__baslik::-webkit-details-marker {
+	display: none;
+}
+
+/* Artı/eksi yalnız görsel; ekran okuyucu açık/kapalı durumunu <details>'ten okur. */
+.sb-tur-gun__baslik::after {
+	content: "+" / "";
+	flex: 0 0 auto;
+	color: var(--wp--preset--color--aksan);
+	font-size: 22px;
+	font-weight: 600;
+	line-height: 1;
+}
+
+.sb-tur-gun[open] > .sb-tur-gun__baslik::after {
+	content: "–" / "";
+}
+
+.sb-tur-gun__metin {
+	padding: 0 0 18px;
+}
+
+/* Fiyata dahil olanlar / olmayanlar: geniş ekranda yan yana; tek liste varsa tam genişlik. */
+.sb-tur-fiyat-kapsami {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+	gap: 16px;
+}
+
+.sb-tur-liste {
+	display: grid;
+	gap: 8px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	color: var(--wp--preset--color--metin-govde);
+	font-size: 15px;
+	line-height: 1.5;
+}
+
+.sb-tur-liste li {
+	position: relative;
+	padding-inline-start: 26px;
+	overflow-wrap: anywhere;
+}
+
+.sb-tur-liste li::before {
+	content: "✓" / "";
+	position: absolute;
+	inset-inline-start: 0;
+	color: color-mix(in srgb, var(--wp--preset--color--basari) 78%, #000);
+	font-weight: 800;
+}
+
+.sb-tur-liste--haric li::before {
+	content: "✕" / "";
+	color: var(--wp--preset--color--aksan-koyu);
+}
+
+/* Biniş noktaları: ad, saat hapı ("Yol üzerinden" sade), harita bağlantısı. */
+.sb-tur-binis {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.sb-tur-binis__nokta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 4px 12px;
+	padding: 8px 0;
+	border-top: 1px solid var(--wp--preset--color--kenarlik);
+}
+
+.sb-tur-binis__nokta:first-child {
+	border-top: 0;
+}
+
+.sb-tur-binis__ad {
+	flex: 1 1 180px;
+	min-width: 0;
+	color: var(--wp--preset--color--metin);
+	font-weight: 700;
+	overflow-wrap: anywhere;
+}
+
+.sb-tur-binis__saat {
+	flex: 0 0 auto;
+	padding: 3px 10px;
+	border-radius: 999px;
+	background: var(--wp--preset--color--yuzey-2);
+	color: var(--wp--preset--color--metin);
+	font-size: 13px;
+	font-weight: 700;
+	line-height: 1.4;
+}
+
+.sb-tur-binis__saat--yol {
+	color: var(--wp--preset--color--metin-govde);
+	font-weight: 600;
+}
+
+.sb-tur-binis__harita {
+	display: inline-flex;
+	align-items: center;
+	min-block-size: var(--sb-dokunma, 44px);
+	color: var(--wp--preset--color--metin);
+	font-size: 14px;
+	font-weight: 700;
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+
+/* "Sorunuz mu var?": açık kırmızı kart, yanında çerçeveli WhatsApp düğmesi. */
+.sb-tur-soru {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px 24px;
+	border-color: transparent;
+	background: var(--wp--preset--color--aksan-acik);
+}
+
+.sb-tur-soru__baslik {
+	margin: 0 0 4px;
+	color: var(--wp--preset--color--metin);
+	font-size: 20px;
+	font-weight: 800;
+	line-height: 1.25;
+	letter-spacing: -0.01em;
+	text-transform: none;
+}
+
+.sb-tur-soru__metin {
+	margin: 0;
+	color: var(--wp--preset--color--metin-govde);
+	font-size: 15px;
+	line-height: 1.6;
+}
+
+.sb-tur-soru__dugme {
+	flex: 0 0 auto;
+}
+
+/* ---------- Masaüstü bölümleri (≥ 1024 px): kart kutusu yok, zeminde 26 px başlık ve altında ince çizgi ----------
+   Program günleri beyaz çerçeveli <details> kartları; dahil olanlar / olmayanlar alt alta, maddeler küçük beyaz
+   kartlarda üç sütun (1024–1279'da iki), dahil kırmızı ✓, olmayan gri ✕. "Sorunuz mu var?" kartı aynı kalır. */
+@media (min-width: 1024px) {
+	.sb-tur__bolumler {
+		gap: 40px;
+	}
+
+	.sb-tur-bolum {
+		padding: 0;
+		border: 0;
+		border-radius: 0;
+		background: none;
+	}
+
+	.sb-tur-bolum__baslik {
+		margin-bottom: 18px;
+		padding-bottom: 12px;
+		border-bottom: 1px solid var(--wp--preset--color--kenarlik);
+		font-size: 26px;
+		font-weight: 500;
+	}
+
+	.sb-tur-gun,
+	.sb-tur-gun:last-child {
+		margin-bottom: 8px;
+		padding-inline: 18px;
+		border: 1px solid var(--wp--preset--color--kenarlik);
+		border-radius: 10px;
+		background: var(--wp--preset--color--yuzey);
+	}
+
+	.sb-tur-fiyat-kapsami {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 40px;
+	}
+
+	.sb-tur-liste {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 12px;
+		font-size: 14px;
+	}
+
+	.sb-tur-liste li {
+		padding: 12px 16px 12px 40px;
+		border: 1px solid var(--wp--preset--color--kenarlik);
+		border-radius: 10px;
+		background: var(--wp--preset--color--yuzey);
+	}
+
+	.sb-tur-liste li::before {
+		inset-inline-start: 16px;
+		color: var(--wp--preset--color--aksan);
+	}
+
+	.sb-tur-liste--haric li::before {
+		color: var(--wp--preset--color--metin-ikincil);
+	}
+}
+
+@media (min-width: 1280px) {
+	.sb-tur-liste {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+}
+
+/* ---------- Galeri penceresi (masaüstü "Tüm Fotoğraflar"; urun-galeri.js <dialog>) ----------
+   Ekranı kaplar, koyu zemin; üstte sayaç ve kapatma, ortada görsel (oranı korunur), iki yanda önceki/sonraki. Açıkken
+   arkadaki sayfa kaymaz. Düğmeler 48 px beyaz daire (metin 15,4:1). */
+.sb-galeri-pencere {
+	box-sizing: border-box;
+	inline-size: 100vw;
+	max-inline-size: none;
+	block-size: 100vh;
+	block-size: 100dvh;
+	max-block-size: none;
+	margin: 0;
+	padding: 20px 24px 32px;
+	border: 0;
+	background: #15171b;
+	color: #fff;
+}
+
+.sb-galeri-pencere[open] {
+	display: grid;
+	grid-template-columns: 64px minmax(0, 1fr) 64px;
+	grid-template-rows: auto minmax(0, 1fr);
+	align-items: center;
+	gap: 16px 12px;
+}
+
+.sb-galeri-pencere::backdrop {
+	background: #15171b;
+}
+
+html:has(.sb-galeri-pencere[open]) {
+	overflow: hidden;
+}
+
+.sb-galeri-pencere__sayac {
+	grid-row: 1;
+	grid-column: 2;
+	margin: 0;
+	font-size: 15px;
+	font-weight: 600;
+	letter-spacing: 0.06em;
+	text-align: center;
+	font-variant-numeric: tabular-nums;
+}
+
+.sb-galeri-pencere__gorsel {
+	grid-row: 2;
+	grid-column: 2;
+	inline-size: 100%;
+	block-size: 100%;
+	object-fit: contain;
+}
+
+.sb-galeri-pencere__kapat,
+.sb-galeri-pencere__ok {
+	display: inline-grid;
+	place-items: center;
+	inline-size: 48px;
+	block-size: 48px;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: var(--wp--preset--color--yuzey);
+	color: var(--wp--preset--color--metin);
+	font-family: inherit;
+	font-size: 20px;
+	line-height: 1;
+	cursor: pointer;
+	justify-self: center;
+}
+
+.sb-galeri-pencere__ok[hidden] {
+	display: none;
+}
+
+.sb-galeri-pencere__kapat {
+	grid-row: 1;
+	grid-column: 3;
+	font-size: 26px;
+}
+
+.sb-galeri-pencere__ok--geri {
+	grid-row: 2;
+	grid-column: 1;
+}
+
+.sb-galeri-pencere__ok--ileri {
+	grid-row: 2;
+	grid-column: 3;
+}
+
+.sb-galeri-pencere :is(.sb-galeri-pencere__kapat, .sb-galeri-pencere__ok):hover {
+	background: var(--wp--preset--color--aksan);
+	color: var(--wp--preset--color--aksan-uzeri);
+}
+
+.sb-galeri-pencere :focus-visible {
+	outline: 3px solid #fff;
+	outline-offset: 3px;
+}
+
+/* ---------- Benzer turlar (magaza.css şeridi) ----------
+   Şerit sayfa kabının içinde (1240 px), ana sayfadakinden dar: kartta 4 sütunda ad sözcük ortasından kırılıyordu
+   (2026-10-24 dev ekranı); 992'den itibaren 2, 1440'tan itibaren 3 kart (magaza.css --sb-serit-adet). */
+.sb-one-cikan.sb-tur-benzer {
+	margin: 0 0 56px;
+}
+
+@media (min-width: 992px) {
+	.sb-one-cikan.sb-tur-benzer {
+		--sb-serit-adet: 2;
+	}
+}
+
+@media (min-width: 1440px) {
+	.sb-one-cikan.sb-tur-benzer {
+		--sb-serit-adet: 3;
+	}
+}
+
+/* ---------- Mobil alt çubuk: fiyat + "Tarih seç" / "Bize yazın" (#sb-tur-secim çapası) ----------
+   Turun sonuna kadar ekranın altına yapışır, sonra akışta kalır (footer'ı örtmez). Çerez bandı (layout.css,
+   z-index 90) açıksa onun altında kalır. */
+.sb-tur-cubuk {
+	position: sticky;
+	bottom: 0;
+	z-index: 80;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 10px var(--sb-kenar) calc(10px + env(safe-area-inset-bottom, 0px));
+	border-top: 1px solid var(--wp--preset--color--kenarlik);
+	background: var(--wp--preset--color--yuzey);
+	box-shadow: 0 -6px 20px rgba(29, 31, 36, 0.08);
+}
+
+.sb-tur-cubuk__fiyat {
+	min-width: 0;
+	margin: 0;
+	color: var(--wp--preset--color--metin-ikincil);
+	font-size: 13px;
+	line-height: 1.3;
+}
+
+.sb-tur-cubuk__tutar {
+	display: block;
+	color: var(--wp--preset--color--aksan);
+	font-size: 20px;
+	font-weight: 800;
+}
+
+.sb-tur-cubuk__dugme {
+	flex: 0 0 auto;
+	padding-inline: 22px;
+}
+
+@media (min-width: 1024px) {
+	.sb-tur-cubuk {
+		display: none;
+	}
+}

@@ -1,0 +1,1890 @@
+/* ==========================================================================
+   Ana sayfa — front-page.php + template-parts/anasayfa/* (Plan 2 Görev 7; bento: "Yeni bento", ana sayfa
+   düzeltme turu 2, taslak .superpowers/tasarim/2026-10-24-hero/varyant-d). "Turlarımız" sekmeleri onaylı
+   taslağın (.superpowers/brainstorm/…/anasayfa-v1.html) kurallarından. Mobil düzen
+   buradaki kırılımlarla (spec §8: 320–414 px birinci sınıf). Sayfa kenarlardan 12 px içeride, en çok 1480 px
+   (taslağın .sayfa'sı; arşiv bandı da 12 px içeride, magaza.css).
+   Fotoğraf üstü beyaz metin: perdeler en açık (beyaz) fotoğrafta da AA verecek koyulukta; ölçüsü
+   tools/tarayici/anasayfa.mjs (enAcikZemindeKontrast). Perdeler tık almaz (pointer-events: none).
+   ========================================================================== */
+
+.sb-anasayfa {
+  box-sizing: border-box;
+  max-inline-size: calc(1480px + 24px);
+  margin-inline: auto;
+  padding: 12px 12px 80px;
+}
+
+/* ---------- Ortak bölüm başlığı (taslak .bolum-bas): başlık + altın çizgi ---------- */
+.sb-bolum-bas {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 44px 0 18px;
+}
+
+.sb-bolum-bas__baslik {
+  margin: 0;
+  color: var(--wp--preset--color--metin);
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.sb-bolum-bas__cizgi {
+  flex: 1 1 24px;
+  height: 1px;
+  background: linear-gradient(90deg, #d9c9a8, transparent);
+}
+
+@media (min-width: 768px) {
+  .sb-bolum-bas {
+    gap: 22px;
+    margin: 64px 0 26px;
+  }
+
+  .sb-bolum-bas__baslik {
+    font-size: 30px;
+    white-space: nowrap;
+  }
+}
+
+/* ---------- 1) Bento ("Yeni bento", ana sayfa düzeltme turu 2) ----------
+   Ölçü, renk ve köşeler taslak D'den, yerleşim owner'ın son çiziminden (2026-10-24). Masaüstü (≥ 1024) ilk ekranı
+   doldurur: solda tema bandına kadar uzanan arama karesi, sağ sütunda (kabın %28,5'i, 300–440 px; kap sorgusu birimi
+   100cqi) üst üste Günübirlik ve Konaklamalı, altta tam genişlikte Tatil Temaları bandı (108 px). Üst bölümün boyu
+   görünür alan − header − üst boşluk (12) − aralık (18) − bant − alt boşluk (12): bandın alt kenarı 1440×900 ve
+   1366×768'de ekranın 12 px üstünde (anasayfa.mjs); 420–720 px arasında tutulur (çok kısa ekranda bant aşağı kayar,
+   çok uzun ekranda bento uzamaz). Arama karesinin içeriği daha uzunsa satırlar uzar, kırpılmaz.
+   Mobilde (< 1024) sıra: arama, iki kare alt alta (tam genişlik, en/boy 3:2), temalar; aralık 12 px.
+   z-index 5: arama önerisi listesi sonraki bölümlerin (kart bağlantı katmanı z-index 1–2, magaza.css) üstünde; header
+   (100), çerez bandı (90) ve çekmecelerin (200+) altında. */
+.sb-bento {
+  position: relative;
+  z-index: 5;
+  container-type: inline-size;
+}
+
+.sb-bento__izgara {
+  --sb-bento-aralik: 12px;
+  display: grid;
+  grid-template-areas:
+    "arama arama"
+    "gun gun"
+    "kon kon"
+    "temalar temalar";
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sb-bento-aralik);
+}
+
+@media (min-width: 1024px) {
+  .sb-bento__izgara {
+    --sb-bento-aralik: 18px;
+    --sb-bento-bant: 108px;
+    --sb-bento-ust: clamp(420px, calc(100svh - var(--sb-header-yuk, 90px) - 24px - var(--sb-bento-aralik) - var(--sb-bento-bant)), 720px);
+    --sb-bento-yarim: calc((var(--sb-bento-ust) - var(--sb-bento-aralik)) / 2);
+    grid-template-areas:
+      "arama gun"
+      "arama kon"
+      "temalar temalar";
+    grid-template-columns: minmax(0, 1fr) clamp(300px, 28.5cqi, 440px);
+    grid-template-rows: minmax(var(--sb-bento-yarim), auto) minmax(var(--sb-bento-yarim), auto) minmax(var(--sb-bento-bant), auto);
+  }
+}
+
+/* Arama karesi (owner 2026-10-25): kapak slaytları kareyi doldurur (tur adı ve "tıkla, turu incele" kutusu görselin
+   içinde, her kapakta fotoğrafın en boş yerinde, üst yarıda ve kenarlardan en az %12 içeride; bento-slayt.js 3 sn'de bir çapraz geçişle döndürür; bağlantılı slayt tıklanınca tura gider), tek
+   satır arama çubuğu: < 1024'te fotoğrafın altında, dışında; masaüstünde fotoğrafın sol altında (kapağın serbest
+   alanı, kapaklarda boş bırakıldı). H1 ve "Tur arayın" görünmez. < 1024'te kapak görselin oranında (3:2, kırpılmaz);
+   masaüstünde görsel üst ortadan sabit: kare görselden genişse alttan, darsa (uzun ekran, en dar oran ~1,2) iki yandan
+   en çok ~%10 kırpılır; üst yarıdaki kart hep tam görünür. */
+.sb-bento__arama {
+  --sb-odak-rengi: var(--wp--preset--color--metin);
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+  display: flex;
+  grid-area: arama;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-width: 0;
+  border-radius: var(--sb-kart-radius, 18px);
+  color: var(--wp--preset--color--metin);
+}
+
+.sb-bento__medya {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 3 / 2;
+  border-radius: inherit;
+  background: #2b2e34;
+}
+
+/* Slaytlar üst üste; görünen is-aktif (JS yoksa ilki). Geçiş çapraz solma; hareketi azalt açıkken anında. */
+.sb-bento__slayt {
+  position: absolute;
+  inset: 0;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+.sb-bento__slayt.is-aktif {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sb-bento__slayt {
+    transition: none;
+  }
+}
+
+/* Bağlantılı slayt medya kabını tamamen kaplar, kap taşanı kırpar (köşeler): base.css'in dışa çizilen odak halkası
+   görünmezdi (Codex review). Halka içeri çizilir: dışta koyu halka, içte beyaz çizgi (fotoğrafın açık ve koyu yerinde de
+   seçilir). Özgüllük base.css'in `html :is(a, …):focus-visible` (0,2,1) kuralını yener. */
+html a.sb-bento__slayt:focus-visible {
+  border-radius: inherit;
+  outline: 3px solid var(--wp--preset--color--metin);
+  outline-offset: -3px;
+}
+
+html a.sb-bento__slayt:focus-visible::after {
+  position: absolute;
+  inset: 3px;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 3px #fff;
+  content: "";
+  pointer-events: none;
+}
+
+/* İlerleme çizgisi (owner 2026-10-25): fotoğrafın üst kenarında, slayt başına bir bölme. Görünen slaydın bölmesi
+   --sb-slayt-sure (bento-slayt.js data-sb-slayt'tan yazar) boyunca dolar; dolum bitince (animationend) bento-slayt.js sıradakine geçer, yani zamanlama bu
+   animasyondur. Karenin üzerine gelinince, karede odak varken ya da sekme gizliyken (is-durgun) dolum durur, çıkınca kaldığı yerden sürer. Geçmiş
+   bölmeler dolu, sıradakiler boş. Beyaz, gölgeli (açık fotoğrafta da seçilir). Dekoratif, tıklanmaz. */
+.sb-bento__ilerleme {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  left: 12px;
+  z-index: 1;
+  display: flex;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.sb-bento__ilerleme[hidden] {
+  display: none;
+}
+
+.sb-bento__ilerleme-dilim {
+  flex: 1 1 0;
+  overflow: hidden;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.45);
+  box-shadow: 0 1px 3px rgba(16, 18, 22, 0.3);
+}
+
+.sb-bento__ilerleme-dolgu {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+}
+
+.sb-bento__ilerleme-dilim.is-dolu .sb-bento__ilerleme-dolgu {
+  transform: none;
+}
+
+.sb-bento__ilerleme-dilim.is-akan .sb-bento__ilerleme-dolgu {
+  animation: sb-ilerleme var(--sb-slayt-sure, 3000ms) linear forwards;
+}
+
+.sb-bento__arama:hover .sb-bento__ilerleme-dolgu,
+.sb-bento__arama:focus-within .sb-bento__ilerleme-dolgu,
+.sb-bento__ilerleme.is-durgun .sb-bento__ilerleme-dolgu {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sb-bento__ilerleme {
+    display: none;
+  }
+}
+
+@keyframes sb-ilerleme {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: none;
+  }
+}
+
+.sb-bento__gorsel {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 38% 20%;
+}
+
+.sb-bento__arama-ic {
+  box-sizing: border-box;
+  margin-top: 12px;
+}
+
+.sb-bento__arama-ic > .sb-bilgi {
+  margin-bottom: 12px;
+}
+
+/* Arama çubuğu: simge, kutu ve "Ara" düğmesi tek beyaz kapta; < 1024'te fotoğrafın altında çerçeveli, masaüstünde
+   fotoğrafın üstünde gölgeli. Düğme ve kutu 44 px (dokunma hedefi); halka koyu. */
+.sb-bento__alan {
+  --sb-odak-rengi: var(--wp--preset--color--metin);
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-sizing: border-box;
+  height: 56px;
+  padding: 6px 6px 6px 44px;
+  border: 1px solid var(--wp--preset--color--kenarlik);
+  border-radius: 12px;
+  background: var(--wp--preset--color--yuzey);
+  color: var(--wp--preset--color--metin);
+}
+
+.sb-bento__alan > .sb-ikon {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  width: 20px;
+  height: 20px;
+  color: var(--wp--preset--color--metin-ikincil);
+  transform: translateY(-50%);
+}
+
+/* Kutu Blocksy'nin form değişkenleriyle boyanır (Blocksy input[type=search] kuralı sınıftan güçlü; değişkeni kaynağında
+   vermek özgüllük savaşından sağlam, base.css): saydam, çerçevesiz; çerçeveyi beyaz kap çizer. */
+.sb-bento__girdi {
+  --theme-form-field-height: 44px;
+  --theme-form-field-padding: 0 8px;
+  --theme-form-field-border-radius: 8px;
+  --theme-form-field-background-initial-color: transparent;
+  --theme-form-field-background-focus-color: transparent;
+  --theme-form-field-border-initial-color: transparent;
+  --theme-form-field-border-focus-color: transparent;
+  --theme-form-text-initial-color: var(--wp--preset--color--metin);
+  --theme-form-text-focus-color: var(--wp--preset--color--metin);
+  --theme-form-font-size: 16px;
+  --theme-form-font-weight: 400;
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+}
+
+.sb-bento__girdi::placeholder {
+  color: var(--wp--preset--color--metin-ikincil);
+  opacity: 1;
+}
+
+.sb-bento__dugme {
+  flex: 0 0 auto;
+  min-width: 72px;
+  height: 44px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--wp--preset--color--aksan);
+  color: var(--wp--preset--color--aksan-uzeri);
+  font-size: 15.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--sb-sure-hizli, 0.2s);
+}
+
+.sb-bento__dugme:hover {
+  background: var(--wp--preset--color--aksan-koyu);
+}
+
+/* Arama önerisi (assets/js/arama-oneri.js; ana sayfa turu 3): kutunun altında, kutunun genişliğinde beyaz liste. Form
+   karenin öbür içeriğinin üstünde (z-index 2; açılış efektindeki öğeler kendi katmanını kurar). Tur satırı en az 60 px
+   (dokunma hedefi ≥ 44): 48 px kare görsel, ad (en çok 2 satır), altında tip rozeti, süre ve fiyat. Seçili ve üzerine
+   gelinen satır yuzey-2 zeminli; ikincil metin orada gövde rengi (metin-ikincil yuzey-2'de 4,27:1, kontrast.mjs). */
+.sb-bento__form {
+  position: relative;
+  z-index: 2;
+}
+
+.sb-oneri {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  left: 0;
+  box-sizing: border-box;
+  padding: 6px;
+  border: 1px solid var(--wp--preset--color--kenarlik);
+  border-radius: 14px;
+  background: var(--wp--preset--color--yuzey);
+  box-shadow: 0 18px 44px rgba(16, 18, 22, 0.24);
+  color: var(--wp--preset--color--metin);
+}
+
+.sb-oneri__oge,
+.sb-oneri__tumu {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  border-radius: 10px;
+  color: var(--wp--preset--color--metin);
+  text-decoration: none;
+}
+
+.sb-oneri__oge {
+  gap: 12px;
+  min-height: 60px;
+  padding: 6px 8px;
+}
+
+.sb-oneri__oge:hover,
+.sb-oneri__oge[aria-selected="true"],
+.sb-oneri__tumu:hover,
+.sb-oneri__tumu[aria-selected="true"] {
+  background: var(--wp--preset--color--yuzey-2);
+  color: var(--wp--preset--color--metin);
+}
+
+.sb-oneri__gorsel {
+  display: block;
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 9px;
+  background: var(--wp--preset--color--yuzey-2);
+  object-fit: cover;
+}
+
+.sb-oneri__metin {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.sb-oneri__ad {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.sb-oneri__alt {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  color: var(--wp--preset--color--metin-govde);
+  font-size: 12.5px;
+  line-height: 1.3;
+}
+
+.sb-oneri__alt .sb-rozet {
+  padding: 2px 7px;
+  font-size: 10.5px;
+}
+
+.sb-oneri__fiyat {
+  margin-left: auto;
+  color: var(--wp--preset--color--metin);
+  font-size: 13.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.sb-oneri__fiyat--sor {
+  color: var(--wp--preset--color--metin-govde);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.sb-oneri__tumu {
+  min-height: 48px;
+  margin-top: 4px;
+  padding: 0 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.sb-oneri__oge + .sb-oneri__tumu {
+  border-top: 1px solid var(--wp--preset--color--kenarlik);
+  border-radius: 0 0 10px 10px;
+}
+
+.sb-oneri__bos {
+  margin: 0;
+  padding: 12px 10px 4px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+/* Dar ekranda büyüteç gizli: yer tutucu ("…tur adı arayın", 216 px) 390 px'te sığsın; "Ara" düğmesi zaten var. */
+@media (max-width: 599px) {
+  .sb-bento__alan {
+    padding-left: 14px;
+  }
+
+  .sb-bento__alan > .sb-ikon {
+    display: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .sb-bento__medya {
+    flex: 1 1 auto;
+    min-height: 0;
+    aspect-ratio: auto;
+  }
+
+  .sb-bento__gorsel {
+    object-position: 50% 0%;
+  }
+
+  .sb-bento__arama-ic {
+    position: absolute;
+    bottom: 24px;
+    left: 24px;
+    width: min(100% - 48px, 520px);
+    margin-top: 0;
+  }
+
+  .sb-bento__alan {
+    border-color: transparent;
+    box-shadow: 0 10px 28px rgba(16, 18, 22, 0.28);
+  }
+}
+
+/* Günübirlik ve Konaklamalı kareleri (owner 2026-10-25): başlık ve "tıkla" kutusu görselin içinde (3:2, Batum kapağı
+   düzeni), perde ve ok yok; sayfadaki başlık yalnız ekran okuyucuya. Sol üstte beyaz "N tur" etiketi. Mobilde tam
+   genişlik ve görselin oranı (kırpılmaz); masaüstünde sağ sütunun genişliğinde, satırın boyunda: kare görselden darsa
+   yanlardan kırpılır (görseldeki kart ve kutu kenarlardan en az %14 içeride), genişse üstten (alt şeritteki yazı kalır). */
+.sb-bento__kart {
+  position: relative;
+  isolation: isolate;
+  display: block;
+  min-width: 0;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  border-radius: var(--sb-kart-radius, 18px);
+  background: #2b2e34;
+  color: #fff;
+  text-decoration: none;
+}
+
+.sb-bento__kart--gunubirlik {
+  grid-area: gun;
+}
+
+.sb-bento__kart--paket {
+  grid-area: kon;
+}
+
+.sb-bento__kart:hover,
+.sb-bento__kart:focus-visible {
+  color: #fff;
+}
+
+.sb-bento__kart-gorsel {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 100%;
+  transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.sb-bento__kart:hover .sb-bento__kart-gorsel {
+  transform: scale(1.05);
+}
+
+.sb-bento__kart > .sb-bilgi {
+  position: absolute;
+  top: 48px;
+  right: 12px;
+  left: 12px;
+}
+
+/* Görseli olmayan karede başlık görünür (görselli karede yalnız ekran okuyucuya, bento.php). Zemin koyu düz renk. */
+.sb-bento__kart-baslik:not(.screen-reader-text) {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  left: 14px;
+  margin: 0;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.12;
+}
+
+.sb-bento__sayi {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: var(--wp--preset--color--yuzey);
+  color: var(--wp--preset--color--metin);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 1024px) {
+  .sb-bento__kart {
+    aspect-ratio: auto;
+  }
+
+  .sb-bento__sayi {
+    top: 14px;
+    left: 14px;
+  }
+}
+
+/* Tatil temaları bandı (template-parts/anasayfa/temalar): beyaz kare, halkalar (konik kırmızı-turuncu degrade) tek
+   satırda; sığmazsa liste yatay kayar (kaydırma çubuğu gizli, odak serit.js ile görünür kalır). Masaüstünde tam
+   genişlik, başlık solda, çizgiyle ayrık; halkalar bandın genişliğine dağılır (owner: "tam genişlikte"; sığmayınca
+   space-between soldan dizer, kaydırma bozulmaz). Liste dolgusu odak halkasının (2 + 2 px) kırpılmaması için. */
+.sb-bento__temalar {
+  grid-area: temalar;
+  min-width: 0;
+  padding: 14px 0 8px;
+  border-radius: var(--sb-kart-radius, 18px);
+  background: var(--wp--preset--color--yuzey);
+}
+
+.sb-bento__temalar-baslik {
+  margin: 0 16px 6px;
+  color: var(--wp--preset--color--metin);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+.sb-temalar__liste {
+  display: flex;
+  gap: 4px;
+  margin: 0;
+  padding: 4px 12px;
+  list-style: none;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: 12px;
+  scrollbar-width: none;
+}
+
+.sb-temalar__liste::-webkit-scrollbar {
+  display: none;
+}
+
+.sb-temalar__oge {
+  display: flex;
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}
+
+.sb-tema {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  width: 80px;
+  padding: 2px 2px 3px;
+  border-radius: 12px;
+  color: var(--wp--preset--color--metin);
+  text-align: center;
+  text-decoration: none;
+}
+
+.sb-tema:hover {
+  color: var(--wp--preset--color--aksan-koyu);
+}
+
+/* Halka: 2,5 px konik degrade, içinde beyaz 2,5 px boşluk. Görselsiz halkanın içi yuzey-2. */
+.sb-tema__halka {
+  display: block;
+  box-sizing: border-box;
+  width: 64px;
+  height: 64px;
+  padding: 2.5px;
+  border-radius: 50%;
+  background: conic-gradient(from 210deg, #d91f26, #f58529, #feda75, #d91f26);
+  transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.sb-tema:hover .sb-tema__halka {
+  transform: translateY(-2px) rotate(-8deg);
+}
+
+.sb-tema__gorsel {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  border: 2.5px solid var(--wp--preset--color--yuzey);
+  border-radius: 50%;
+  background: var(--wp--preset--color--yuzey-2);
+  object-fit: cover;
+}
+
+.sb-tema__halka:not(:has(img)) {
+  background:
+    radial-gradient(circle closest-side, var(--wp--preset--color--yuzey-2) calc(100% - 5px), var(--wp--preset--color--yuzey) calc(100% - 5px) calc(100% - 2.5px), transparent calc(100% - 2.5px)),
+    conic-gradient(from 210deg, #d91f26, #f58529, #feda75, #d91f26);
+}
+
+.sb-tema__ad {
+  margin-top: 5px;
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+.sb-tema__sayi {
+  color: var(--wp--preset--color--metin-ikincil);
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+@media (min-width: 1024px) {
+  .sb-bento__temalar {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 0 18px 0 22px;
+  }
+
+  .sb-bento__temalar-baslik {
+    display: flex;
+    flex: none;
+    align-items: center;
+    align-self: stretch;
+    box-sizing: border-box;
+    width: 96px;
+    margin: 0;
+    padding-right: 14px;
+    border-right: 1px solid var(--wp--preset--color--kenarlik);
+  }
+
+  .sb-temalar__liste {
+    flex: 1 1 auto;
+    justify-content: space-between;
+    gap: 8px;
+    min-width: 0;
+    padding: 4px;
+    scroll-padding-inline: 4px;
+  }
+
+  .sb-tema {
+    width: 92px;
+  }
+
+  .sb-tema__halka {
+    width: 58px;
+    height: 58px;
+  }
+}
+
+/* ---------- Bento'nun açılış efektleri (ana sayfa turu 3; owner onayı 2026-10-24, örnek
+   .superpowers/tasarim/2026-10-24-hero/efekt-ornegi) ----------
+   Saf CSS ve yalnız hareketi azalt kapalıyken: azaltınca hiç animasyon yok, her şey baştan son hâlinde
+   (anasayfa-hareket.mjs). Yalnız transform, opacity ve filter: yerleşim değişmez (CLS 0). Taban stillerde opaklık ya da
+   kayma yok; başlangıç hâli anahtar karelerin `from`unda, `backwards` dolgusuyla gecikme boyunca tutulur; animasyon
+   bitince öğe taban stiline (`to` ile aynı: opak, kaymasız) döner, kalıcı dönüşüm ve katman kalmaz. Opaklığı 0'dan
+   başlayan son animasyon 2 sn içinde biter (en geç 10. halka: 0,9 + 9 × 0,06 + 0,5 = 1,94 sn). Sonsuz döngü yok
+   (final review K-6, WCAG 2.2.2): fotoğrafın "nefes"i bir kez gidip gelir ve opaklığa dokunmaz.
+   1) Giriş slaytlarının görseli durağan (owner 2026-10-25: yakınlaşma kalktı); slaytlar yalnız çapraz solmayla değişir.
+      Slaytların dönüşü sürekli ama düğmesiz (owner kararı); süreyi ilerleme çizgisi gösterir, üzerine gelince ve karede
+      odak varken durur, hareketi azalt açıkken hiç dönmez (bento-slayt.js).
+   2) Arama alanı aşağıdan (0,35 sn). Başlık ve "Tur arayın" görünmez, hızlı etiketler kalktı (owner 2026-10-25).
+   3) Günübirlik ve Konaklamalı sağ sütundayken (≥ 1024) sağdan, mobilde aşağıdan (0,6 / 0,78 sn); sağdan gelirken sayfa
+      yana taşmaz (Blocksy'nin #main-container'ı yatayda kırpıyor, overflow-x: clip; anasayfa-hareket.mjs ölçer).
+      Üstüne gelince fotoğraf yakınlaşır, ok dolar (yukarıdaki kare kuralları).
+   4) Tema halkaları tek tek "pop" (0,9 sn + sıra × 60 ms; sıra temalar.php'den, en çok 9). Örnekte 1 sn + sıra × 80 ms
+      idi; 8–10 halkada son halka 2 sn'yi geçmesin diye sıkıştırıldı. */
+@media (prefers-reduced-motion: no-preference) {
+  .sb-bento__alan {
+    animation: sb-bento-yuksel 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) 0.35s backwards;
+  }
+
+  .sb-bento__kart {
+    animation: sb-bento-kay-alt 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) 0.6s backwards;
+  }
+
+  .sb-bento__kart--paket {
+    animation-delay: 0.78s;
+  }
+
+  .sb-temalar__oge {
+    animation: sb-bento-pop 0.5s cubic-bezier(0.3, 1.6, 0.5, 1) calc(0.9s + var(--sb-sira, 0) * 60ms) backwards;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (min-width: 1024px) {
+  .sb-bento__kart {
+    animation-name: sb-bento-kay-yan;
+  }
+}
+
+@keyframes sb-bento-yuksel {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes sb-bento-kay-yan {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes sb-bento-kay-alt {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes sb-bento-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- Rota haritası (ana sayfa turu 4; owner onayı 2026-10-24, taslak
+   .superpowers/tasarim/2026-10-24-hero/rota-haritasi): "Turlarımız"dan sonra, altbilgiden önce ----------
+   Ölçü, renk ve hareket taslaktan. Harita SVG'sinin yazı ve çizgi ölçüleri viewBox birimi (1000 geniş). Dar ekranda
+   (< 720) harita kenardan kenara, yalnız ana noktalar etiketli, kart haritanın altında akışa girer; ≥ 1024'te liste
+   haritanın sağında (330 px). Seçim (rota-haritasi.js): bölüm data-aktif alır, seçilen rota öne çıkar, öbürleri
+   soluklaşır. Açılış çizimi .sb-rota--ciz (gizli başlangıç) + .sb-rota--ciziliyor (çizim) sınıflarıyla; ikisini de
+   betik çizim başlarken ekler, bitince kaldırır. Sınıfsız hâl durağan ve tamdır (JS yok, hareket azaltılmış, bölüm
+   henüz görünmedi). */
+.sb-rota {
+  --sb-rota-deniz: #edf0ef;
+  --sb-rota-kara: #e4ded4;
+  --sb-rota-kiyi: #cbc2b5;
+  --sb-rota-hale: rgba(246, 244, 241, 0.92);
+  margin-top: 56px;
+  color: var(--wp--preset--color--metin);
+}
+
+.sb-rota__bas {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.sb-rota__baslik {
+  margin: 0;
+  color: var(--wp--preset--color--metin);
+  font-size: clamp(36px, 4.4vw, 60px);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.sb-rota__giris {
+  display: grid;
+  gap: 16px;
+}
+
+.sb-rota__metin {
+  max-width: 46ch;
+  margin: 0;
+  color: #575b63;
+  font-size: 17px;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+.sb-rota__kalkis {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 14px;
+}
+
+.sb-rota__kalkis-et {
+  flex-basis: 100%;
+  margin-right: 4px;
+  color: var(--wp--preset--color--metin-ikincil);
+}
+
+.sb-rota__kalkis-yer {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 14px 0 12px;
+  border: 1px solid var(--wp--preset--color--kenarlik);
+  border-radius: 999px;
+  background: var(--wp--preset--color--yuzey);
+  font-weight: 500;
+}
+
+.sb-rota__kalkis-yer::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  box-sizing: border-box;
+  border: 2px solid var(--wp--preset--color--metin);
+  border-radius: 50%;
+  background: var(--wp--preset--color--yuzey);
+}
+
+.sb-rota__kalkis-yer--ana {
+  border-color: #f3c6c8;
+  color: var(--wp--preset--color--aksan-koyu);
+  font-weight: 600;
+}
+
+.sb-rota__kalkis-yer--ana::before {
+  border-color: var(--wp--preset--color--aksan);
+  background: var(--wp--preset--color--aksan);
+  box-shadow: 0 0 0 3px #fbdadb;
+}
+
+.sb-rota__govde {
+  display: grid;
+  gap: 16px;
+}
+
+/* Harita */
+.sb-rota__harita {
+  position: relative;
+  margin: 0 -12px;
+  overflow: hidden;
+  border-block: 1px solid var(--wp--preset--color--kenarlik);
+  background: var(--sb-rota-deniz);
+}
+
+.sb-rota__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  font-family: inherit;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sb-rota__deniz,
+.sb-rota__gol {
+  fill: var(--sb-rota-deniz);
+}
+
+.sb-rota__izgara {
+  fill: none;
+  stroke: #dfe4e3;
+  stroke-width: 1;
+}
+
+.sb-rota__komsu {
+  fill: var(--wp--preset--color--yuzey-2);
+}
+
+.sb-rota__kara {
+  fill: var(--sb-rota-kara);
+}
+
+.sb-rota__sinir {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
+
+.sb-rota__kiyi {
+  fill: none;
+  stroke: var(--sb-rota-kiyi);
+  stroke-width: 1;
+  stroke-linejoin: round;
+}
+
+.sb-rota__ulke {
+  fill: #6e6962;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+}
+
+.sb-rota__ulke--ana {
+  fill: #6a645c;
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: 0.6em;
+}
+
+.sb-rota__deniz-ad {
+  fill: #5d6e78;
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: 0.32em;
+}
+
+.sb-rota__kalkis-hatti {
+  fill: none;
+  stroke: var(--wp--preset--color--metin);
+  stroke-width: 2.2;
+  stroke-dasharray: 0 6.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sb-rota__kalkis-nokta circle {
+  fill: var(--wp--preset--color--yuzey);
+  stroke: var(--wp--preset--color--metin);
+  stroke-width: 2.2;
+}
+
+.sb-rota__yol {
+  fill: none;
+  stroke: var(--wp--preset--color--aksan);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  transition: opacity 0.25s;
+}
+
+.sb-rota__durak {
+  cursor: pointer;
+}
+
+.sb-rota__durak-alan {
+  fill: transparent;
+}
+
+.sb-rota__durak-halka {
+  fill: var(--wp--preset--color--yuzey);
+  stroke: var(--wp--preset--color--aksan);
+  stroke-width: 2.6;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: fill 0.2s, transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.25s;
+}
+
+.sb-rota__durak:hover .sb-rota__durak-halka {
+  transform: scale(1.25);
+}
+
+.sb-rota__etiket {
+  fill: var(--wp--preset--color--metin);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  paint-order: stroke;
+  stroke: var(--sb-rota-hale);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+
+.sb-rota__etiket--kucuk {
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.sb-rota__etiket--kalkis {
+  fill: #3a3d44;
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.sb-rota__etiket--merkez {
+  fill: var(--wp--preset--color--aksan-koyu);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.sb-rota__merkez-nokta {
+  fill: var(--wp--preset--color--aksan);
+  stroke: var(--wp--preset--color--yuzey);
+  stroke-width: 3;
+}
+
+.sb-rota__dalga {
+  fill: none;
+  stroke: var(--wp--preset--color--aksan);
+  stroke-width: 2;
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0.22;
+  transform: scale(2);
+}
+
+.sb-rota__dalga--2 {
+  display: none;
+}
+
+.sb-rota__gezgin {
+  fill: var(--wp--preset--color--yuzey);
+  stroke: var(--wp--preset--color--aksan-koyu);
+  stroke-width: 2.6;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sb-rota__gezgin.is-gorunur {
+  opacity: 1;
+}
+
+/* Seçim: biri öne çıkar, öbürleri geri çekilir. */
+.sb-rota[data-aktif] .sb-rota__yol {
+  opacity: 0.16;
+}
+
+.sb-rota[data-aktif] .sb-rota__yol.is-aktif {
+  opacity: 1;
+  stroke-width: 3.6;
+}
+
+.sb-rota[data-aktif] .sb-rota__durak:not(.is-aktif) .sb-rota__durak-halka,
+.sb-rota[data-aktif] .sb-rota__etiket[data-yer]:not(.is-aktif) {
+  opacity: 0.4;
+}
+
+.sb-rota__durak.is-aktif .sb-rota__durak-halka {
+  fill: var(--wp--preset--color--aksan);
+  transform: scale(1.3);
+}
+
+/* Lejant ve kaynak */
+.sb-rota__alt {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 20px;
+  padding: 12px;
+  border-top: 1px solid var(--wp--preset--color--kenarlik);
+  background: var(--wp--preset--color--yuzey);
+  color: #575b63;
+  font-size: 13px;
+}
+
+.sb-rota__lejant {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sb-rota__lejant li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sb-rota__lejant svg {
+  flex: none;
+}
+
+.sb-rota__kaynak {
+  color: var(--wp--preset--color--metin-ikincil);
+}
+
+/* Kart (haritadaki seçim): masaüstünde haritanın üstünde, rotayı ve Rize'yi örtmeyen yerde (rota-haritasi.js). */
+.sb-rota__kart {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  box-sizing: border-box;
+  width: min(272px, calc(100% - 24px));
+  padding: 16px 16px 14px;
+  border: 1px solid var(--wp--preset--color--kenarlik);
+  border-radius: 16px;
+  background: var(--wp--preset--color--yuzey);
+  box-shadow: 0 1px 2px rgba(60, 40, 20, 0.06), 0 16px 36px -14px rgba(60, 40, 20, 0.32);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.18s, transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+}
+
+.sb-rota__kart.is-acik {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.sb-rota__kart[hidden] {
+  display: block;
+  visibility: hidden;
+}
+
+.sb-rota__kart-ust {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  color: var(--wp--preset--color--metin-ikincil);
+  font-size: 13px;
+}
+
+.sb-rota__kart-ust .sb-rozet:empty {
+  display: none;
+}
+
+.sb-rota__kart-ad {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.sb-rota__kart-tur {
+  margin: 4px 0 0;
+  color: #50545c;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.sb-rota__kart-alt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--wp--preset--color--kenarlik);
+}
+
+.sb-rota__kart-sayi {
+  color: var(--wp--preset--color--metin-ikincil);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.sb-rota__kart-git {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  margin: -8px -8px -8px 0;
+  padding: 0 8px;
+  border-radius: 10px;
+  color: var(--wp--preset--color--aksan-koyu);
+  font-size: 14.5px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.2s;
+}
+
+.sb-rota__kart-git:hover {
+  background: var(--wp--preset--color--aksan-acik);
+}
+
+.sb-rota__kart-git .sb-rota__ok {
+  transition: transform 0.2s;
+}
+
+.sb-rota__kart-git:hover .sb-rota__ok {
+  transform: translateX(3px);
+}
+
+/* Varış listesi (haritanın erişilebilir karşılığı; haritasız da kullanılır) */
+.sb-rota__liste {
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  border: 1px solid var(--wp--preset--color--kenarlik);
+  border-radius: 18px;
+  background: var(--wp--preset--color--yuzey);
+}
+
+.sb-rota__liste ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sb-rota__liste-baslik {
+  margin: 0;
+  color: var(--wp--preset--color--metin);
+  padding: 12px 12px 4px;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.sb-rota__grup + .sb-rota__grup {
+  margin-top: 4px;
+}
+
+.sb-rota__grup-ad {
+  margin: 0;
+  padding: 10px 12px 4px;
+  color: var(--wp--preset--color--metin-ikincil);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.sb-rota__not {
+  margin: auto 0 0;
+  padding: 16px 12px 8px;
+  color: var(--wp--preset--color--metin-ikincil);
+  font-size: 13px;
+}
+
+.sb-rota__varis {
+  display: grid;
+  grid-template-columns: 12px minmax(0, 1fr) auto 16px;
+  align-items: center;
+  gap: 12px;
+  min-height: 46px;
+  padding: 0 12px;
+  border-radius: 12px;
+  color: inherit;
+  text-decoration: none;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.sb-rota__varis-nokta {
+  width: 10px;
+  height: 10px;
+  box-sizing: border-box;
+  border: 2.4px solid var(--wp--preset--color--aksan);
+  border-radius: 50%;
+  background: var(--wp--preset--color--yuzey);
+  transition: background-color 0.2s;
+}
+
+.sb-rota__varis-ad {
+  font-size: 15.5px;
+  font-weight: 500;
+}
+
+.sb-rota__varis-sayi {
+  color: var(--wp--preset--color--metin-ikincil);
+  font-size: 13.5px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.sb-rota__varis .sb-rota__ok {
+  color: #9a9ea6;
+  transition: transform 0.2s, color 0.2s;
+}
+
+.sb-rota__varis:hover,
+.sb-rota__varis.is-aktif {
+  background: #fbeded;
+}
+
+.sb-rota__varis:hover .sb-rota__varis-ad,
+.sb-rota__varis.is-aktif .sb-rota__varis-ad {
+  color: var(--wp--preset--color--aksan-koyu);
+}
+
+.sb-rota__varis:hover .sb-rota__varis-nokta,
+.sb-rota__varis.is-aktif .sb-rota__varis-nokta {
+  background: var(--wp--preset--color--aksan);
+}
+
+.sb-rota__varis:hover .sb-rota__ok,
+.sb-rota__varis.is-aktif .sb-rota__ok {
+  color: var(--wp--preset--color--aksan-koyu);
+  transform: translateX(3px);
+}
+
+.sb-rota__varis:active {
+  transform: translateY(1px);
+}
+
+/* Açılış çizimi (yalnız JS + hareket izni varken, rota-haritasi.js; yoksa her şey baştan görünür). */
+.sb-rota--ciz .sb-rota__yol {
+  stroke-dasharray: calc(var(--sb-uz) * 1px) calc(var(--sb-uz) * 1px + 40px);
+  stroke-dashoffset: calc(var(--sb-uz) * 1px + 6px);
+}
+
+.sb-rota--ciz .sb-rota__durak-halka,
+.sb-rota--ciz .sb-rota__etiket[data-yer] {
+  opacity: 0;
+  transition: none;
+}
+
+.sb-rota--ciz .sb-rota__durak-halka {
+  transform: scale(0.2);
+}
+
+.sb-rota--ciz .sb-rota__merkez {
+  opacity: 0;
+}
+
+.sb-rota--ciz.sb-rota--ciziliyor .sb-rota__yol {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset var(--sb-sure) cubic-bezier(0.55, 0, 0.25, 1) var(--sb-gec);
+}
+
+.sb-rota--ciz.sb-rota--ciziliyor .sb-rota__durak-halka,
+.sb-rota--ciz.sb-rota--ciziliyor .sb-rota__etiket[data-yer] {
+  opacity: 1;
+  transition: opacity 0.3s var(--sb-var-gec, 0s), transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) var(--sb-var-gec, 0s);
+}
+
+.sb-rota--ciz.sb-rota--ciziliyor .sb-rota__durak-halka {
+  transform: none;
+}
+
+.sb-rota--ciz.sb-rota--ciziliyor .sb-rota__merkez {
+  opacity: 1;
+  transition: opacity 0.4s;
+}
+
+/* Rize'nin atan halkası yalnız hareket izni varken; azaltılmışken durağan tek halka (taban kural). Üç dalga sonra durur
+   (final review K-6, WCAG 2.2.2): ilk halka taban hâline (durağan tek halka) döner, ikincisi son karesinde (görünmez)
+   kalır. Açılış çiziminin gizli hâlinde dalga beklemede, çizim başlayınca (Rize belirince) baştan başlar: harita
+   sayfanın aşağısında, ziyaretçi gelmeden biten dalgayı görmezdi. */
+@media (prefers-reduced-motion: no-preference) {
+  .sb-rota__dalga {
+    animation: sb-rota-dalga 2.8s cubic-bezier(0.2, 0.6, 0.3, 1) 3;
+  }
+
+  .sb-rota__dalga--2 {
+    display: inline;
+    animation-delay: 1.4s;
+    animation-fill-mode: forwards;
+  }
+
+  .sb-rota--ciz:not(.sb-rota--ciziliyor) .sb-rota__dalga {
+    animation: none;
+  }
+}
+
+@keyframes sb-rota-dalga {
+  from {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(3.4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sb-rota__kart,
+  .sb-rota__yol,
+  .sb-rota__durak-halka,
+  .sb-rota__varis,
+  .sb-rota__ok {
+    transition: none;
+  }
+}
+
+/* Dar ekran: yalnız ana noktalar etiketli, kart haritanın altında akışta (dokunulan nokta örtülmez). */
+@media (max-width: 719px) {
+  .sb-rota__etiket {
+    font-size: 32px;
+    stroke-width: 7px;
+  }
+
+  .sb-rota__etiket--merkez {
+    font-size: 40px;
+    transform: translate(-6px, -10px);
+  }
+
+  .sb-rota__etiket--kucuk,
+  .sb-rota__etiket--kalkis,
+  .sb-rota__ikincil,
+  .sb-rota__dar-gizli,
+  .sb-rota__uzun {
+    display: none;
+  }
+
+  .sb-rota__ulke {
+    font-size: 20px;
+  }
+
+  .sb-rota__ulke--ana {
+    font-size: 30px;
+    letter-spacing: 0.4em;
+  }
+
+  .sb-rota__deniz-ad {
+    font-size: 26px;
+  }
+
+  .sb-rota__yol {
+    stroke-width: 4.2;
+  }
+
+  .sb-rota[data-aktif] .sb-rota__yol.is-aktif {
+    stroke-width: 6;
+  }
+
+  .sb-rota__durak-halka {
+    r: 10px;
+    stroke-width: 4.4;
+  }
+
+  .sb-rota__durak-alan {
+    r: 40px;
+  }
+
+  .sb-rota__kalkis-nokta circle {
+    r: 8px;
+    stroke-width: 3.6;
+  }
+
+  .sb-rota__merkez-nokta {
+    r: 13px;
+    stroke-width: 4;
+  }
+
+  .sb-rota__gezgin {
+    r: 8px;
+    stroke-width: 4;
+  }
+
+  .sb-rota__kalkis-hatti {
+    stroke-width: 3.6;
+    stroke-dasharray: 0 10;
+  }
+
+  /* Dar ekranda çakışan etiketler kaydırılır. */
+  .sb-rota__etiket[data-yer="kapadokya"] {
+    transform: translateY(18px);
+  }
+
+  .sb-rota__etiket[data-yer="erzurum"] {
+    text-anchor: middle;
+    transform: translate(-12px, 34px);
+  }
+
+  .sb-rota__kart {
+    position: relative;
+    display: none;
+    width: auto;
+    margin: 12px;
+    box-shadow: 0 1px 2px rgba(60, 40, 20, 0.06);
+    transform: none;
+    transition: none;
+  }
+
+  .sb-rota__kart.is-acik {
+    display: block;
+  }
+
+  .sb-rota__kart[hidden] {
+    display: none;
+  }
+}
+
+@media (min-width: 720px) {
+  .sb-rota__kalkis-et {
+    flex-basis: auto;
+  }
+
+  .sb-rota__harita {
+    margin: 0;
+    border: 1px solid var(--wp--preset--color--kenarlik);
+    border-radius: 18px;
+  }
+
+  .sb-rota__alt {
+    padding-inline: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .sb-rota {
+    margin-top: 88px;
+  }
+
+  .sb-rota__bas {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 470px);
+    align-items: end;
+    gap: 48px;
+    margin-bottom: 36px;
+  }
+
+  .sb-rota__govde {
+    grid-template-columns: minmax(0, 1fr) 330px;
+    align-items: stretch;
+    gap: 20px;
+  }
+}
+
+/* ---------- "Turlarımız" (ana sayfa turu 5: bento'nun hemen altında, panelde en çok 16 kart): kategori sekmeleri (sekmeler.js), ızgara tur kartları ---------- */
+/* Dar ekranda eşit hücreli iki sütun, tek sayıda sekmede sonuncusu tam satır (düzensiz kırılan satır
+   istenmiyor, owner 2026-10-01; mobil-duzen.mjs). 768'den itibaren haplar satır kırılarak yan yana. */
+.sb-sekmeler__liste {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 24px;
+}
+
+/* Sekme hapı magaza.css .sb-cip'ten, 2 px çerçeveyle. Seçili sekme taslağın hap başlığı (.pill-bas): koyu
+   2 px çerçeve ve koyu yazı (beyaz yüzeyde 16,5:1; sekme-durum.mjs alt çizgiyi ölçer), seçili olmayan
+   gövde rengi; üzerine gelince çerçeve kırmızı (.sb-cip:hover), seçiliyle karışmaz. magaza.css bu dosyadan sonra
+   yüklenir: seçiciler kapla nitelenir. */
+.sb-sekmeler .sb-sekmeler__sekme {
+  justify-content: center;
+  padding: 6px 10px;
+  border-width: 2px;
+  color: var(--wp--preset--color--metin-govde);
+  font-size: 13.5px;
+  font-weight: 700;
+  text-align: center;
+  white-space: normal;
+}
+
+.sb-sekmeler .sb-sekmeler__sekme[aria-selected="true"] {
+  border-color: var(--wp--preset--color--metin);
+  color: var(--wp--preset--color--metin);
+}
+
+.sb-sekmeler .sb-sekmeler__sekme:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 768px) {
+  .sb-sekmeler__liste {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+  }
+
+  .sb-sekmeler .sb-sekmeler__sekme {
+    padding: 0 20px;
+    font-size: 15px;
+    white-space: nowrap;
+  }
+}
+
+.sb-sekmeler__panel[hidden] {
+  display: none;
+}
+
+/* JS'siz: paneller alt alta, her biri kendi başlığıyla. */
+.sb-sekmeler__panel + .sb-sekmeler__panel {
+  margin-top: 48px;
+}
+
+.sb-sekmeler__panel-baslik {
+  margin: 0 0 16px;
+  color: var(--wp--preset--color--metin);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.sb-sekmeler--etkin .sb-sekmeler__panel + .sb-sekmeler__panel {
+  margin-top: 0;
+}
+
+.sb-sekmeler--etkin .sb-sekmeler__panel-baslik {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Izgara: 1 / 2 (640) / 3 (992) / 4 (1280) sütun, 18 px aralık (taslak .turlar). magaza.css'in genel
+   ul.products ızgarası (2 sütun, 40/20 px) bu dosyadan sonra yüklenir: seçici bölümle nitelenir. */
+.sb-turlarimiz ul.sb-turlarimiz__izgara {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+}
+
+@media (min-width: 640px) {
+  .sb-turlarimiz ul.sb-turlarimiz__izgara {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 992px) {
+  .sb-turlarimiz ul.sb-turlarimiz__izgara {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .sb-turlarimiz ul.sb-turlarimiz__izgara {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.sb-sekmeler__tumu {
+  margin-top: 28px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sb-bento__kart-gorsel {
+    transition: none;
+  }
+
+  .sb-bento__kart:hover .sb-bento__kart-gorsel,
+  .sb-tema:hover .sb-tema__halka {
+    transform: none;
+  }
+}
+
+/* ---------- Tanıtım (template-parts/anasayfa/tanitim.php; owner 2026-11-01, eski sitenin ana sayfa blokları) ----------
+   Solda üst etiket + başlık + 2×2 özellik ızgarası (simge açık kırmızı dairede), sağda kırmızı panel: eski sitenin
+   "DÜNYADAN BİZE BİZİMLE HER YERE" bandı, beyaz logo ve WhatsApp düğmesi. ≥ 1024 px iki sütun, altında alt alta. */
+.sb-tanitim {
+  display: grid;
+  gap: 24px;
+  margin-top: 64px;
+}
+
+/* Sol kart: Kapadokya fotoğrafı (süs) + beyaz perde. Perde başlığın olduğu sol üstte ve özelliklerin olduğu altta
+   neredeyse opak (koyu metin beyaz zemindeki kontrastını korur); fotoğraf metinsiz sağ üst köşede görünür. */
+.sb-tanitim__metin {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  padding: 32px 24px;
+  border: 1px solid var(--wp--preset--color--kenarlik);
+  border-radius: var(--sb-kart-radius);
+  background: var(--wp--preset--color--yuzey);
+}
+
+.sb-tanitim__metin > .sb-tanitim__zemin {
+  object-position: 70% 20%;
+}
+
+.sb-tanitim__metin::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background:
+    linear-gradient(to top, rgb(255 255 255 / 0.97) 0%, rgb(255 255 255 / 0.95) 42%, transparent 78%),
+    linear-gradient(to right, rgb(255 255 255 / 0.97) 0%, rgb(255 255 255 / 0.9) 38%, rgb(255 255 255 / 0.15) 85%);
+}
+
+.sb-tanitim__ust {
+  margin: 0 0 12px;
+  color: var(--wp--preset--color--aksan-koyu);
+  font-size: var(--wp--preset--font-size--kucuk);
+  font-weight: 700;
+  letter-spacing: var(--sb-harf-etiket);
+  line-height: var(--sb-satir-arayuz);
+}
+
+.sb-tanitim__baslik {
+  max-inline-size: 22ch;
+  margin: 0 0 32px;
+  color: var(--wp--preset--color--metin);
+  font-size: clamp(26px, 3vw, 38px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+/* Özellikler kartın dibinde (yan paneldeki slogan daha uzun; boşluk başlıkla özellikler arasında kalır). */
+.sb-tanitim__ozellikler {
+  display: grid;
+  gap: 22px 28px;
+  margin: auto 0 0;
+  padding: 28px 0 0;
+  border-top: 1px solid var(--wp--preset--color--kenarlik);
+  list-style: none;
+}
+
+.sb-ozellik {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  column-gap: 14px;
+  align-items: center;
+}
+
+.sb-ozellik__ikon {
+  display: grid;
+  grid-row: span 2;
+  place-items: center;
+  inline-size: 48px;
+  block-size: 48px;
+  border-radius: 50%;
+  background: var(--wp--preset--color--aksan-acik);
+  color: var(--wp--preset--color--aksan-koyu);
+}
+
+.sb-ozellik__ad {
+  align-self: end;
+  color: var(--wp--preset--color--metin);
+  font-size: var(--wp--preset--font-size--kucuk);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: var(--sb-satir-arayuz);
+}
+
+.sb-ozellik__alt {
+  align-self: start;
+  color: var(--wp--preset--color--metin-govde);
+  font-size: var(--wp--preset--font-size--kucuk);
+  line-height: var(--sb-satir-arayuz);
+}
+
+/* Panel: fotoğraf (süs, kenara kadar) + kırmızı perde; metin perdenin koyu tarafında (solda). Perde metnin olduğu
+   yerde %90+ koyu kırmızı: beyaz metin fotoğrafın en açık yerinde de AA. Kırpma yok: görsel ve perde köşeyi kendisi
+   yuvarlar. */
+.sb-tanitim__pano {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 28px;
+  min-block-size: 360px;
+  padding: 32px 24px;
+  border-radius: var(--sb-kart-radius);
+  background: var(--wp--preset--color--aksan-koyu);
+  color: var(--wp--preset--color--aksan-uzeri);
+}
+
+.sb-tanitim__zemin {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+}
+
+.sb-tanitim__pano::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(
+    105deg,
+    color-mix(in srgb, var(--wp--preset--color--aksan-koyu) 96%, transparent) 0%,
+    color-mix(in srgb, var(--wp--preset--color--aksan-koyu) 90%, transparent) 45%,
+    color-mix(in srgb, var(--wp--preset--color--aksan-koyu) 55%, transparent) 100%
+  );
+}
+
+.sb-tanitim__slogan {
+  max-inline-size: 9ch;
+  margin: 0;
+  font-size: clamp(34px, 4.4vw, 56px);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.02;
+}
+
+.sb-tanitim__logo {
+  display: block;
+  inline-size: min(220px, 60%);
+  height: auto;
+}
+
+/* Kırmızı zeminde beyaz düğme (koyu metin); üzerine gelince kırmızı zemin, beyaz çerçeve. */
+.sb-tanitim__dugme {
+  --theme-button-background-initial-color: var(--wp--preset--color--yuzey);
+  --theme-button-text-initial-color: var(--wp--preset--color--metin);
+  --theme-button-background-hover-color: transparent;
+  --theme-button-text-hover-color: var(--wp--preset--color--aksan-uzeri);
+  --sb-btn-kenar: var(--wp--preset--color--yuzey);
+  --sb-btn-kenar-hover: var(--wp--preset--color--yuzey);
+  /* Ortak düğmenin dikey boşluğu 0 (yükseklik min-block-size'tan); uzun metinde iç boşluk açık olsun. Yükseklik
+     değişmez: 12 + satır + 12 < dokunma yüksekliği. */
+  padding-block: 12px;
+  font-size: var(--wp--preset--font-size--kucuk);
+  font-weight: 700;
+  letter-spacing: var(--sb-harf-sekme);
+}
+
+.sb-tanitim__dugme:focus-visible {
+  outline-color: var(--wp--preset--color--yuzey);
+}
+
+/* 320 px'te düğme metni panelin iç genişliğine (248 px) sığmıyor, iki satıra iniyordu (doğal genişlik 276 px). */
+@media (max-width: 359px) {
+  .sb-tanitim__dugme {
+    padding-inline: 18px;
+    letter-spacing: 0.04em;
+  }
+}
+
+@media (min-width: 640px) {
+  .sb-tanitim__ozellikler {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .sb-tanitim {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: 18px;
+    margin-top: 80px;
+  }
+
+  .sb-tanitim__metin,
+  .sb-tanitim__pano {
+    padding: 48px;
+  }
+}

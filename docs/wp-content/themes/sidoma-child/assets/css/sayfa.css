@@ -1,0 +1,418 @@
+/* =====================================================================
+   Sidoma Turizm — statik ve yasal sayfalar, İletişim formu, SSS, 404 (sayfa.css) — Görev 11
+   sb_stil_haritasi() (inc/assets.php:73) statik sayfalarda (sepet/ödeme/Hesabım ve ön sayfa hariç) ve
+   404'te yükler (Plan 2 Görev 7: ana sayfada form yok). Başlık bandı ve çerez bandı layout.css'te.
+   Beyaz zeminde gövde metni metin-govde (#747474, 4,67:1; spec §4.1).
+   ===================================================================== */
+
+/* ---------- Sayfa gövdesi (template-parts/sayfa.php) ---------- */
+.sb-sayfa {
+  padding-block-end: 60px;
+}
+
+@media (min-width: 992px) {
+  .sb-sayfa {
+    padding-block-end: 100px;
+  }
+}
+
+.sb-sayfa__icerik {
+  color: var(--wp--preset--color--metin-govde);
+  font-size: var(--wp--preset--font-size--normal);
+  line-height: var(--sb-satir-govde);
+}
+
+.sb-sayfa__icerik :is(h2, h3, h4) {
+  color: var(--wp--preset--color--metin);
+  font-weight: 500;
+}
+
+.sb-sayfa__icerik h2 {
+  font-size: var(--wp--preset--font-size--baslik-4);
+}
+
+.sb-sayfa__icerik h3 {
+  font-size: var(--wp--preset--font-size--orta);
+}
+
+/* Cümle içi bağlantı (spec §4.1 "Inline" istisnası): altı çizili koyu metin (12,6:1). */
+.sb-sayfa__icerik a {
+  color: var(--wp--preset--color--metin);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.sb-sayfa__icerik a:hover {
+  color: var(--wp--preset--color--aksan-koyu);
+}
+
+/* Tablolar: geniş tablo kendi içinde kayar; 390 px'de sayfa taşmaz. */
+.sb-sayfa__icerik .wp-block-table {
+  overflow-x: auto;
+}
+
+.sb-sayfa__icerik :is(th, td) {
+  padding: 10px;
+  border: 1px solid var(--wp--preset--color--kenarlik);
+  text-align: start;
+  vertical-align: top;
+}
+
+.sb-sayfa__icerik th {
+  color: var(--wp--preset--color--metin);
+  font-weight: 500;
+}
+
+/* ---------- Yasal metin şablonu (page-templates/yasal.php) ----------
+   800 px sütun (Mober gizlilik-desktop-fold.png). En az 16 px (spec §4.3; Mesafeli Sözleşmeler
+   Yön. md.6/1 "en az 12 punto"). Blok düzenleyicinin küçük yazı sınıfları değişkeni !important'la
+   basıyor (wp-includes/class-wp-theme-json.php:2640-2660): sınıf ezilmez, değişken bu sütunda
+   16 px'e eşitlenir. Avukattan yapıştırılan küçük yazılı metin de 16 px kalır. */
+.sb-sayfa--yasal .sb-sayfa__icerik {
+  --wp--preset--font-size--xs: var(--wp--preset--font-size--normal);
+  --wp--preset--font-size--kucuk: var(--wp--preset--font-size--normal);
+  max-inline-size: 800px;
+  margin-inline: auto;
+}
+
+.sb-sayfa--yasal .sb-sayfa__icerik :is(small, figcaption, .wp-element-caption, table) {
+  font-size: var(--wp--preset--font-size--normal);
+}
+
+/* ---------- SSS: çekirdeğin Ayrıntılar bloğu (<details>; spec §4.3) ----------
+   Klavye ve ekran okuyucu davranışı yerel, JS yok; JS kapalıyken de açılır. Soru satırı
+   bağımsız etkileşimli öğe: en az 44 px (spec §4.1). "+ / −" süs: alternatif metni boş,
+   ekran okuyucuya okunmaz (açık/kapalı durumunu <details> bildirir). */
+.sb-sayfa__icerik .wp-block-details {
+  border-bottom: 1px solid var(--wp--preset--color--kenarlik);
+}
+
+.sb-sayfa__icerik .wp-block-details > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  min-block-size: var(--sb-dokunma);
+  padding-block: 10px;
+  color: var(--wp--preset--color--metin);
+  font-weight: 500;
+  list-style: none;
+  cursor: pointer;
+}
+
+.sb-sayfa__icerik .wp-block-details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.sb-sayfa__icerik .wp-block-details > summary::after {
+  content: "+";
+  content: "+" / "";
+  flex: none;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.sb-sayfa__icerik .wp-block-details[open] > summary::after {
+  content: "−";
+  content: "−" / "";
+}
+
+.sb-sayfa__icerik .wp-block-details > :not(summary) {
+  margin-block: 0 20px;
+}
+
+/* ---------- İletişim sayfası: künye listesi ve form ---------- */
+.sb-sayfa__icerik .sb-kunye {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px 20px;
+  margin: 0 0 40px;
+}
+
+@media (min-width: 768px) {
+  .sb-sayfa__icerik .sb-kunye {
+    grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
+  }
+}
+
+.sb-sayfa__icerik .sb-kunye dt {
+  color: var(--wp--preset--color--metin);
+  font-weight: 500;
+}
+
+.sb-sayfa__icerik .sb-kunye dd {
+  margin: 0 0 10px;
+  overflow-wrap: anywhere;
+}
+
+/* İletişim iki sütun (owner 2026-10-25): künye solda, form sağda. Sayfa içeriğine dokunmadan, yalnız
+   künye listesiyle form doğrudan çocuk olduğunda (başlık + kısa kod çifti); başlıklar ilk satırda, içerik
+   ikinci satırda, böylece iki sütunun üst kenarı aynı hizada. Altında tek sütun (mobil sırası: künye, form). */
+@media (min-width: 1024px) {
+  .sb-sayfa__icerik:has(> .sb-kunye):has(> .sb-iletisim-formu) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: auto 1fr;
+    column-gap: 48px;
+    align-items: start;
+  }
+
+  .sb-sayfa__icerik:has(> .sb-kunye):has(> .sb-iletisim-formu) > * {
+    max-inline-size: none;
+    margin-inline: 0 !important; /* çekirdeğin constrained düzeni auto kenar boşluğunu !important basar */
+  }
+
+  .sb-sayfa__icerik > :is(h2:has(+ .sb-kunye), .sb-kunye) {
+    grid-column: 1;
+  }
+
+  .sb-sayfa__icerik > :is(h2:has(+ .sb-iletisim-formu), .sb-iletisim-formu) {
+    grid-column: 2;
+  }
+
+  .sb-sayfa__icerik > h2:has(+ :is(.sb-kunye, .sb-iletisim-formu)) {
+    grid-row: 1;
+    margin-block-start: 0;
+  }
+
+  .sb-sayfa__icerik > :is(.sb-kunye, .sb-iletisim-formu) {
+    grid-row: 2;
+  }
+
+  .sb-sayfa__icerik:has(> .sb-iletisim-formu) > .sb-kunye {
+    grid-template-columns: minmax(0, 150px) minmax(0, 1fr);
+  }
+}
+
+/* İletişim formu çerçeveli kart (owner isteği 2026-10-01): ince çerçeve, header kartıyla aynı yuvarlak köşe,
+   içeride rahat iç boşluk. Çerçeve ≥ 3:1 (WCAG 1.4.11 yalnız etkileşimli sınır için; bu süs çerçevesi). */
+.sb-iletisim-formu {
+  box-sizing: border-box;
+  max-inline-size: 640px;
+  padding: clamp(24px, 4vw, 48px);
+  border: 1px solid var(--wp--preset--color--kenarlik, #dedede);
+  border-radius: 16px;
+  background: var(--wp--preset--color--yuzey);
+}
+
+/* VİP Transfer talep bölümünün düzeni vip.css'te (yalnız o sayfada yüklenir). */
+
+/* ---------- Fluent Forms, İletişim sayfası (beyaz zemin) ----------
+   Mober'in alt çizgili alanları (rep-tokens.md "Inputs"); çizgi metin-ikincil (#6A6A6A, 5,36:1):
+   alan sınırı ≥ 3:1 (WCAG 1.4.11; Mober'in açık çizgisi kopyalanmadı). Alanlar ve düğme ≥ 44 px.
+   Ana sayfanın koyu fotoğraflı bölümü anasayfa.css'te (Görev 7). */
+.sb-sayfa .fluentform .ff-el-input--label label {
+  color: var(--wp--preset--color--metin);
+  font-size: var(--wp--preset--font-size--kucuk);
+  font-weight: 500;
+}
+
+.sb-sayfa .fluentform .ff-el-form-control {
+  box-sizing: border-box;
+  min-block-size: var(--sb-dokunma);
+  padding: 10px 0;
+  border: 0;
+  border-bottom: 1px solid var(--wp--preset--color--metin-ikincil);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--wp--preset--color--metin);
+  font-size: var(--wp--preset--font-size--normal);
+}
+
+.sb-sayfa .fluentform textarea.ff-el-form-control {
+  min-block-size: 140px;
+}
+
+/* FF'nin odak kuralı (.ff-default .ff-el-form-control:focus { outline: none }, 0,3,0;
+   fluentform-public-default.css) genel halkayı yeniyor; halka iki formda da açıkça verilir.
+   Renk --sb-odak-rengi: ana sayfanın koyu fotoğraflı formunda beyaz (anasayfa.css). Görev 12:
+   kural yalnız İletişim sayfasındaydı (.sb-sayfa), ana sayfa formunun alanlarında halka yoktu. */
+html .fluentform .ff-el-form-control:focus-visible {
+  outline: 2px solid var(--sb-odak-rengi, var(--wp--preset--color--metin));
+  outline-offset: 2px;
+}
+
+/* Düğme: FF form başına background-color/color basıyor (SubmitButton.php:121-125; seçici
+   0,3,1), Blocksy'nin [type="submit"] kuralı da vuruyor; nitelik seçicili kural ikisini yener
+   (nostaljikradyo sayfa.css:110-114 ölçümü). Dolu düğme deseni (base.css .sb-btn--dolu):
+   kum + koyu metin 6,45:1, hover/odak koyu kum + beyaz 4,96:1. Ana sayfada da aynı. */
+.fluentform .ff-btn.ff-btn-submit[type="submit"] {
+  min-block-size: var(--sb-dokunma);
+  min-inline-size: var(--sb-dokunma);
+  padding: 0 30px;
+  border: 1px solid var(--wp--preset--color--aksan);
+  border-radius: 0;
+  background-color: var(--wp--preset--color--aksan);
+  color: var(--wp--preset--color--aksan-uzeri);
+  font-size: var(--wp--preset--font-size--normal);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.fluentform .ff-btn.ff-btn-submit[type="submit"]:is(:hover, :focus-visible) {
+  border-color: var(--wp--preset--color--aksan-koyu);
+  background-color: var(--wp--preset--color--aksan-koyu);
+  color: var(--wp--preset--color--yuzey);
+}
+
+/* Gönder düğmesinin odak halkası: FF odakta halkayı kaldırıp düğmeyi %80 saydam yapıyor
+   (.ff-default .ff_btn_style:focus, 0,3,0). Görev 12 odak taraması: iki formda da halka yoktu. */
+.fluentform .ff-btn.ff-btn-submit[type="submit"]:focus-visible {
+  outline: 2px solid var(--sb-odak-rengi, var(--wp--preset--color--metin));
+  outline-offset: 2px;
+  opacity: 1;
+}
+
+/* Alan hata iletisi akışı kaydırmaz. Fluent Forms iletiyi alan grubunun sonuna ekliyor ve alan
+   odağını kaybedince siliyor. İleti akıştayken, hatalı bir gönderimden sonra formu düzeltip
+   "Gönder"e basan kullanıcının fare basışı son alanın odağını düşürüyor, ileti silinip düğme
+   ~24 px yukarı kayıyor ve fare bırakılınca tıklama düğmeye düşmüyordu: ilk tık kayboluyordu
+   (tarayıcıda ölçüldü, Görev 11). İleti grubun alt boşluğuna konumlanır; boşluk iletiyi taşır.
+   Ana sayfanın formu da (sayfa.css ön sayfada yüklenir) aynı kuralla. */
+.fluentform .ff-el-group {
+  position: relative;
+  margin-bottom: 30px;
+}
+
+.fluentform .ff-el-group .ff-el-input--content > .error.text-danger {
+  position: absolute;
+  inset-inline-start: 0;
+  top: 100%;
+  margin: 4px 0 0;
+  font-size: var(--wp--preset--font-size--kucuk);
+  line-height: 1.3;
+}
+
+/* Hata rengi: FF'nin varsayılan kırmızısı (#f56c6c, fluentform-public-default.css
+   --fluentform-danger) beyazda 2,90:1; alan iletisi ve hatalı alanın çizgisi hata token'ıyla
+   (#B42318, ≥ 4,5:1; kontrast.mjs). Ana sayfanın koyu bölümü anasayfa.css'te. */
+.sb-sayfa .fluentform {
+  --fluentform-danger: var(--wp--preset--color--hata);
+}
+
+/* KVKK notu (mu-plugin iletisim.php): gönder düğmesinin hemen üstünde. */
+.sb-form-kvkk {
+  margin: 0 0 20px;
+  color: var(--wp--preset--color--metin-ikincil);
+  font-size: var(--wp--preset--font-size--kucuk);
+  line-height: var(--sb-satir-arayuz);
+}
+
+.sb-form-kvkk a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ---------- 404 (404.php; spec §4.3) ----------
+   Tam ekran görsel: bölüm en az ekran boyu eksi header (--sb-header-yuk: 64 / 90 px, layout.css). Görsel
+   üstünde .55 perde (anasayfa.css iletişim bölümünün ölçüsü: en açık fotoğrafta beyaz ≥ 4,5:1); perde
+   tık yutmaz. Görsel yoksa koyu dolgu (beyaz 16,49:1). Metin beyaz (yuzey): Plan 2 Görev 5'ten beri
+   zemin #F6F4F1, fotoğrafta beyazın yerini tutmuyor. */
+.sb-404 {
+  position: relative;
+  display: grid;
+  align-items: center;
+  min-block-size: calc(100svh - var(--sb-header-yuk));
+  padding-block: 60px;
+  overflow: hidden;
+  background: var(--wp--preset--color--koyu-dolgu);
+  color: var(--wp--preset--color--yuzey);
+  text-align: center;
+  --sb-odak-rengi: var(--wp--preset--color--yuzey);
+}
+
+.sb-404__gorsel {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sb-404--gorselli::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+}
+
+.sb-404__icerik {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  gap: 20px;
+}
+
+.sb-404__kod {
+  margin: 0;
+  color: var(--wp--preset--color--yuzey);
+  font-size: clamp(96px, 20vw, 240px);
+  font-weight: 400;
+  line-height: 1;
+}
+
+.sb-404__baslik {
+  margin: 0;
+  color: inherit;
+  font-size: var(--wp--preset--font-size--orta);
+  font-weight: 500;
+  letter-spacing: var(--sb-harf-etiket);
+  text-transform: uppercase;
+}
+
+.sb-404__metin {
+  max-inline-size: 560px;
+  margin: 0;
+}
+
+.sb-404__arama {
+  display: flex;
+  gap: 10px;
+  inline-size: min(100%, 480px);
+}
+
+.sb-404__arama input[type="search"] {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  min-block-size: var(--sb-dokunma);
+  padding: 0 12px;
+  border: 1px solid var(--wp--preset--color--yuzey);
+  border-radius: 0;
+  background: var(--wp--preset--color--yuzey);
+  color: var(--wp--preset--color--metin);
+  font-size: var(--wp--preset--font-size--normal);
+}
+
+/* ---------- Çapraz medya + metin satırları (Hakkımızda; owner isteği 2026-10-01) ----------
+   Görsel ve metin sütunları dönüşümlü (blok işaretlemesinde mediaPosition). Mobilde alt alta
+   (is-stacked-on-mobile). Satırlar arasında nefes payı, metin sütununda iç boşluk. */
+.wp-block-media-text {
+  margin-block: 0 clamp(40px, 6vw, 80px);
+  gap: 0;
+}
+
+.wp-block-media-text > .wp-block-media-text__content {
+  padding: 0 clamp(24px, 6vw, 88px);
+}
+
+.wp-block-media-text > .wp-block-media-text__media img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.wp-block-media-text h2,
+.wp-block-media-text h3 {
+  margin-top: 0;
+}
+
+@media (max-width: 600px) {
+  .wp-block-media-text > .wp-block-media-text__content {
+    padding: 24px 0 0;
+  }
+}
