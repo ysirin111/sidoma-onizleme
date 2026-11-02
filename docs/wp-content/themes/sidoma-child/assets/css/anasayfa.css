@@ -4,8 +4,8 @@
    taslağın (.superpowers/brainstorm/…/anasayfa-v1.html) kurallarından. Mobil düzen
    buradaki kırılımlarla (spec §8: 320–414 px birinci sınıf). Sayfa kenarlardan 12 px içeride, en çok 1480 px
    (taslağın .sayfa'sı; arşiv bandı da 12 px içeride, magaza.css).
-   Fotoğraf üstü beyaz metin: perdeler en açık (beyaz) fotoğrafta da AA verecek koyulukta; ölçüsü
-   tools/tarayici/anasayfa.mjs (enAcikZemindeKontrast). Perdeler tık almaz (pointer-events: none).
+   Arama karesinde fotoğrafın üstünde perde yok (owner 2026-10-25); arama çubuğu opak beyaz, yazı kontrastı fotoğrafa
+   bağlı değil (tools/tarayici/anasayfa.mjs fotoğrafın perdesizliğini ölçer).
    ========================================================================== */
 
 .sb-anasayfa {
@@ -51,13 +51,13 @@
 }
 
 /* ---------- 1) Bento ("Yeni bento", ana sayfa düzeltme turu 2) ----------
-   Ölçü, renk ve köşeler taslak D'den, yerleşim owner'ın son çiziminden (2026-10-24). Masaüstü (≥ 1024) ilk ekranı
-   doldurur: solda tema bandına kadar uzanan arama karesi, sağ sütunda (kabın %28,5'i, 300–440 px; kap sorgusu birimi
-   100cqi) üst üste Günübirlik ve Konaklamalı, altta tam genişlikte Tatil Temaları bandı (108 px). Üst bölümün boyu
+   Ölçü, renk ve köşeler taslak D'den, yerleşim owner'ın son çiziminden (2026-10-24); owner 2026-11-02: sağdaki Günübirlik
+   ve Konaklamalı kareleri kalktı, arama karesi (kapak slaytı) kabın tam genişliğine yayıldı. Masaüstü (≥ 1024) ilk ekranı
+   doldurur: üstte tam genişlikte arama karesi, altta tam genişlikte Tatil Temaları bandı (108 px). Üst bölümün boyu
    görünür alan − header − üst boşluk (12) − aralık (18) − bant − alt boşluk (12): bandın alt kenarı 1440×900 ve
    1366×768'de ekranın 12 px üstünde (anasayfa.mjs); 420–720 px arasında tutulur (çok kısa ekranda bant aşağı kayar,
-   çok uzun ekranda bento uzamaz). Arama karesinin içeriği daha uzunsa satırlar uzar, kırpılmaz.
-   Mobilde (< 1024) sıra: arama, iki kare alt alta (tam genişlik, en/boy 3:2), temalar; aralık 12 px.
+   çok uzun ekranda bento uzamaz). Arama karesinin içeriği daha uzunsa satır uzar, kırpılmaz.
+   Mobilde (< 1024) sıra: arama (3:2), temalar; aralık 12 px.
    z-index 5: arama önerisi listesi sonraki bölümlerin (kart bağlantı katmanı z-index 1–2, magaza.css) üstünde; header
    (100), çerez bandı (90) ve çekmecelerin (200+) altında. */
 .sb-bento {
@@ -70,11 +70,9 @@
   --sb-bento-aralik: 12px;
   display: grid;
   grid-template-areas:
-    "arama arama"
-    "gun gun"
-    "kon kon"
-    "temalar temalar";
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+    "arama"
+    "temalar";
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--sb-bento-aralik);
 }
 
@@ -83,22 +81,17 @@
     --sb-bento-aralik: 18px;
     --sb-bento-bant: 108px;
     --sb-bento-ust: clamp(420px, calc(100svh - var(--sb-header-yuk, 90px) - 24px - var(--sb-bento-aralik) - var(--sb-bento-bant)), 720px);
-    --sb-bento-yarim: calc((var(--sb-bento-ust) - var(--sb-bento-aralik)) / 2);
-    grid-template-areas:
-      "arama gun"
-      "arama kon"
-      "temalar temalar";
-    grid-template-columns: minmax(0, 1fr) clamp(300px, 28.5cqi, 440px);
-    grid-template-rows: minmax(var(--sb-bento-yarim), auto) minmax(var(--sb-bento-yarim), auto) minmax(var(--sb-bento-bant), auto);
+    grid-template-rows: minmax(var(--sb-bento-ust), auto) minmax(var(--sb-bento-bant), auto);
   }
 }
 
 /* Arama karesi (owner 2026-10-25): kapak slaytları kareyi doldurur (tur adı ve "tıkla, turu incele" kutusu görselin
    içinde, her kapakta fotoğrafın en boş yerinde, üst yarıda ve kenarlardan en az %12 içeride; bento-slayt.js 3 sn'de bir çapraz geçişle döndürür; bağlantılı slayt tıklanınca tura gider), tek
-   satır arama çubuğu: < 1024'te fotoğrafın altında, dışında; masaüstünde fotoğrafın sol altında (kapağın serbest
+   satır arama çubuğu: < 1024'te fotoğrafın altında, dışında; masaüstünde fotoğrafın alt ortasında (owner 2026-11-02; kapağın serbest
    alanı, kapaklarda boş bırakıldı). H1 ve "Tur arayın" görünmez. < 1024'te kapak görselin oranında (3:2, kırpılmaz);
-   masaüstünde görsel üst ortadan sabit: kare görselden genişse alttan, darsa (uzun ekran, en dar oran ~1,2) iki yandan
-   en çok ~%10 kırpılır; üst yarıdaki kart hep tam görünür. */
+   masaüstünde görsel üst ortadan sabit: kare tam genişlikte olduğundan görselden hep geniş (en geniş oran ~2,5:1,
+   1366×768) ve alttan kırpılır; kapaktaki başlık kartı ve "tıkla" kutusu üst yarıda, hep tam görünür (1024–1920 px'te
+   mevcut kapaklarla ölçüldü, owner 2026-11-02). */
 .sb-bento__arama {
   --sb-odak-rengi: var(--wp--preset--color--metin);
   position: relative;
@@ -465,105 +458,16 @@ html a.sb-bento__slayt:focus-visible::after {
 
   .sb-bento__arama-ic {
     position: absolute;
+    inset-inline: 0;
     bottom: 24px;
-    left: 24px;
     width: min(100% - 48px, 520px);
+    margin-inline: auto;
     margin-top: 0;
   }
 
   .sb-bento__alan {
     border-color: transparent;
     box-shadow: 0 10px 28px rgba(16, 18, 22, 0.28);
-  }
-}
-
-/* Günübirlik ve Konaklamalı kareleri (owner 2026-10-25): başlık ve "tıkla" kutusu görselin içinde (3:2, Batum kapağı
-   düzeni), perde ve ok yok; sayfadaki başlık yalnız ekran okuyucuya. Sol üstte beyaz "N tur" etiketi. Mobilde tam
-   genişlik ve görselin oranı (kırpılmaz); masaüstünde sağ sütunun genişliğinde, satırın boyunda: kare görselden darsa
-   yanlardan kırpılır (görseldeki kart ve kutu kenarlardan en az %14 içeride), genişse üstten (alt şeritteki yazı kalır). */
-.sb-bento__kart {
-  position: relative;
-  isolation: isolate;
-  display: block;
-  min-width: 0;
-  aspect-ratio: 3 / 2;
-  overflow: hidden;
-  border-radius: var(--sb-kart-radius, 18px);
-  background: #2b2e34;
-  color: #fff;
-  text-decoration: none;
-}
-
-.sb-bento__kart--gunubirlik {
-  grid-area: gun;
-}
-
-.sb-bento__kart--paket {
-  grid-area: kon;
-}
-
-.sb-bento__kart:hover,
-.sb-bento__kart:focus-visible {
-  color: #fff;
-}
-
-.sb-bento__kart-gorsel {
-  position: absolute;
-  inset: 0;
-  z-index: -2;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 50% 100%;
-  transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
-}
-
-.sb-bento__kart:hover .sb-bento__kart-gorsel {
-  transform: scale(1.05);
-}
-
-.sb-bento__kart > .sb-bilgi {
-  position: absolute;
-  top: 48px;
-  right: 12px;
-  left: 12px;
-}
-
-/* Görseli olmayan karede başlık görünür (görselli karede yalnız ekran okuyucuya, bento.php). Zemin koyu düz renk. */
-.sb-bento__kart-baslik:not(.screen-reader-text) {
-  position: absolute;
-  right: 14px;
-  bottom: 14px;
-  left: 14px;
-  margin: 0;
-  color: #fff;
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 1.12;
-}
-
-.sb-bento__sayi {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  padding: 4px 10px;
-  border-radius: 8px;
-  background: var(--wp--preset--color--yuzey);
-  color: var(--wp--preset--color--metin);
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1.4;
-  font-variant-numeric: tabular-nums;
-}
-
-@media (min-width: 1024px) {
-  .sb-bento__kart {
-    aspect-ratio: auto;
-  }
-
-  .sb-bento__sayi {
-    top: 14px;
-    left: 14px;
   }
 }
 
@@ -715,7 +619,7 @@ html a.sb-bento__slayt:focus-visible::after {
 }
 
 /* ---------- Bento'nun açılış efektleri (ana sayfa turu 3; owner onayı 2026-10-24, örnek
-   .superpowers/tasarim/2026-10-24-hero/efekt-ornegi) ----------
+   .superpowers/tasarim/2026-10-24-hero/efekt-ornegi; owner 2026-11-02: sağ kareler ve onların efektleri kalktı) ----------
    Saf CSS ve yalnız hareketi azalt kapalıyken: azaltınca hiç animasyon yok, her şey baştan son hâlinde
    (anasayfa-hareket.mjs). Yalnız transform, opacity ve filter: yerleşim değişmez (CLS 0). Taban stillerde opaklık ya da
    kayma yok; başlangıç hâli anahtar karelerin `from`unda, `backwards` dolgusuyla gecikme boyunca tutulur; animasyon
@@ -726,22 +630,11 @@ html a.sb-bento__slayt:focus-visible::after {
       Slaytların dönüşü sürekli ama düğmesiz (owner kararı); süreyi ilerleme çizgisi gösterir, üzerine gelince ve karede
       odak varken durur, hareketi azalt açıkken hiç dönmez (bento-slayt.js).
    2) Arama alanı aşağıdan (0,35 sn). Başlık ve "Tur arayın" görünmez, hızlı etiketler kalktı (owner 2026-10-25).
-   3) Günübirlik ve Konaklamalı sağ sütundayken (≥ 1024) sağdan, mobilde aşağıdan (0,6 / 0,78 sn); sağdan gelirken sayfa
-      yana taşmaz (Blocksy'nin #main-container'ı yatayda kırpıyor, overflow-x: clip; anasayfa-hareket.mjs ölçer).
-      Üstüne gelince fotoğraf yakınlaşır, ok dolar (yukarıdaki kare kuralları).
-   4) Tema halkaları tek tek "pop" (0,9 sn + sıra × 60 ms; sıra temalar.php'den, en çok 9). Örnekte 1 sn + sıra × 80 ms
+   3) Tema halkaları tek tek "pop" (0,9 sn + sıra × 60 ms; sıra temalar.php'den, en çok 9). Örnekte 1 sn + sıra × 80 ms
       idi; 8–10 halkada son halka 2 sn'yi geçmesin diye sıkıştırıldı. */
 @media (prefers-reduced-motion: no-preference) {
   .sb-bento__alan {
     animation: sb-bento-yuksel 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) 0.35s backwards;
-  }
-
-  .sb-bento__kart {
-    animation: sb-bento-kay-alt 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) 0.6s backwards;
-  }
-
-  .sb-bento__kart--paket {
-    animation-delay: 0.78s;
   }
 
   .sb-temalar__oge {
@@ -749,40 +642,10 @@ html a.sb-bento__slayt:focus-visible::after {
   }
 }
 
-@media (prefers-reduced-motion: no-preference) and (min-width: 1024px) {
-  .sb-bento__kart {
-    animation-name: sb-bento-kay-yan;
-  }
-}
-
 @keyframes sb-bento-yuksel {
   from {
     opacity: 0;
     transform: translateY(18px);
-  }
-
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@keyframes sb-bento-kay-yan {
-  from {
-    opacity: 0;
-    transform: translateX(40px);
-  }
-
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@keyframes sb-bento-kay-alt {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
   }
 
   to {
@@ -1674,11 +1537,6 @@ html a.sb-bento__slayt:focus-visible::after {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sb-bento__kart-gorsel {
-    transition: none;
-  }
-
-  .sb-bento__kart:hover .sb-bento__kart-gorsel,
   .sb-tema:hover .sb-tema__halka {
     transform: none;
   }
