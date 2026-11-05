@@ -435,6 +435,257 @@ ul.products li.sb-tur-oge {
 	color: var(--wp--preset--color--aksan-koyu);
 }
 
+/* ---------- Tur kartı: ızgara, yeni görünüm (owner 2026-11-05, referans liste kartı) ----------
+   Beyaz kart, yumuşak gölge, 16 px köşe. Görselde solda durum ve indirim hapı (indirim kırmızı), sağda koyu lacivert
+   tip hapı (saat simgesi). Gövde: bilgi satırı (çıkış solda, kategori sağda; 12,5 px gri), ad en çok 2 satır,
+   kısa açıklama en çok 2 satır, yeşil çipler (ilk 2 dahil satırı), alt satır: solda "Kişi başı" + eski/güncel
+   fiyat, sağda "İncele" (düğme görünümlü, bağlantı değil: kart başlıktaki bağlantıyla tıklanır) ve WhatsApp
+   düğmesi (kartı kaplayan katmanın üstünde, kendi bağlantısı). Dar kartta düğmeler fiyatın altına iner.
+   Renkler tema paletinden; yeşil ve lacivert temada yok, kart kapsamında tanımlı: yeşil #1B6B3C beyazda 6,5:1,
+   çip zemininde (#E6F4EA) 5,9:1; beyaz yazı laciverdte 14:1. */
+.sb-tur-kart--izgara {
+	--sb-kart-radius: 16px;
+	--sb-kart-yesil: #1b6b3c;
+	--sb-kart-yesil-acik: #e6f4ea;
+	--sb-kart-lacivert: #14284b;
+	border-color: transparent;
+	box-shadow: 0 4px 20px rgba(20, 40, 75, 0.09);
+}
+
+.sb-tur-kart--izgara:hover {
+	box-shadow: 0 10px 30px rgba(20, 40, 75, 0.15);
+}
+
+.sb-tur-kart--izgara .sb-tur-kart__rozetler {
+	right: auto;
+	max-width: 58%;
+}
+
+.sb-tur-kart--izgara .sb-tur-kart__rozetler .sb-rozet {
+	padding: 5px 11px;
+	border-radius: 999px;
+	font-size: 12px;
+	letter-spacing: 0.02em;
+	text-transform: none;
+}
+
+.sb-tur-kart--izgara .sb-rozet--indirim {
+	color: var(--wp--preset--color--aksan-uzeri);
+	background: var(--wp--preset--color--aksan);
+}
+
+.sb-tur-kart__tip {
+	position: absolute;
+	top: 12px;
+	right: 12px;
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	padding: 5px 11px;
+	border-radius: 999px;
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.4;
+	color: #fff;
+	background: var(--sb-kart-lacivert);
+	box-shadow: 0 1px 4px rgba(20, 40, 75, 0.25);
+}
+
+.sb-tur-kart--izgara .sb-ikon {
+	flex: 0 0 auto;
+	width: 14px;
+	height: 14px;
+}
+
+.sb-tur-kart__bilgi {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 4px 12px;
+	margin-bottom: 8px;
+}
+
+.sb-tur-kart__bilgi > p {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	min-width: 0;
+	margin: 0;
+	font-size: 12.5px;
+	line-height: 1.4;
+	color: var(--wp--preset--color--metin-ikincil);
+}
+
+.sb-tur-kart__bilgi > p > span {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.sb-tur-kart__bilgi > .sb-tur-kart__cikis {
+	flex: 1 1 auto;
+}
+
+.sb-tur-kart__bilgi > .sb-tur-kart__kategori {
+	flex: 0 1 auto;
+	max-width: 52%;
+}
+
+.sb-tur-kart--izgara .sb-tur-kart__ad {
+	display: -webkit-box;
+	overflow: hidden;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	line-clamp: 2;
+}
+
+.sb-tur-kart__aciklama {
+	display: -webkit-box;
+	overflow: hidden;
+	margin: 6px 0 0;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	line-clamp: 2;
+	font-size: 13.5px;
+	line-height: 1.45;
+	overflow-wrap: anywhere;
+	color: var(--wp--preset--color--metin-ikincil);
+}
+
+.sb-tur-kart__cipler {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin: 10px 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+.sb-tur-kart__cipler li {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	max-width: 100%;
+	margin: 0;
+	padding: 4px 9px;
+	border-radius: 8px;
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.3;
+	color: var(--sb-kart-yesil);
+	background: var(--sb-kart-yesil-acik);
+}
+
+.sb-tur-kart__cipler li > span {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.sb-tur-kart--izgara .sb-tur-kart__alt {
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: 10px 12px;
+	padding-top: 14px;
+}
+
+.sb-tur-kart--izgara .sb-tur-kart__fiyat {
+	display: flex;
+	flex: 1 1 auto;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 0 8px;
+	margin: 0;
+	text-align: left;
+}
+
+.sb-tur-kart__etiket {
+	flex: 0 0 100%;
+	font-size: 10.5px;
+	font-weight: 700;
+	line-height: 1.5;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--wp--preset--color--metin-ikincil);
+}
+
+.sb-tur-kart__eski {
+	font-size: 14px;
+	font-weight: 500;
+	text-decoration: line-through;
+	color: var(--wp--preset--color--metin-ikincil);
+}
+
+.sb-tur-kart__eski .amount {
+	font-weight: inherit;
+}
+
+.sb-tur-kart--izgara .sb-tur-kart__tutar {
+	font-size: 22px;
+	color: var(--sb-kart-yesil);
+}
+
+.sb-tur-kart--izgara .sb-tur-kart__fiyat--sor {
+	display: block;
+	max-width: none;
+}
+
+.sb-tur-kart__eylemler {
+	display: flex;
+	flex: 0 0 auto;
+	gap: 8px;
+	margin-left: auto;
+}
+
+.sb-tur-kart__incele,
+.sb-tur-kart__wa {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	height: 40px;
+	border-radius: 10px;
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1;
+}
+
+.sb-tur-kart__incele {
+	padding: 0 18px;
+	color: #fff;
+	background: var(--sb-kart-lacivert);
+	transition: background-color var(--sb-sure, 0.3s) ease;
+}
+
+.sb-tur-kart:hover .sb-tur-kart__incele {
+	background: #0d1c37;
+}
+
+/* Kartı kaplayan başlık katmanının (z-index 1) üstünde: WhatsApp'a tık tur sayfasına gitmez. */
+.sb-tur-kart__wa {
+	position: relative;
+	z-index: 2;
+	width: 40px;
+	border: 2px solid var(--sb-kart-yesil);
+	color: var(--sb-kart-yesil);
+	background: #fff;
+	text-decoration: none;
+	transition: background-color var(--sb-sure, 0.3s) ease;
+}
+
+.sb-tur-kart__wa:hover {
+	background: var(--sb-kart-yesil-acik);
+}
+
+.sb-tur-kart__wa:focus-visible {
+	outline: 2px solid var(--wp--preset--color--metin);
+	outline-offset: 2px;
+}
+
+.sb-tur-kart__wa .sb-ikon {
+	width: 20px;
+	height: 20px;
+}
+
 /* ---------- Tur kartı: şerit (taslak D .f-card; ana sayfa şeridi ve benzer turlar) ----------
    "Yeni bento" (ana sayfa düzeltme turu 2): beyaz kart, 12 px dolgu, solda 76 px kare görsel (sb-kare, köşe 12 px);
    yanında üst satır tip rozeti + süre, ad en çok 2 satır, çıkış tek satır (konum simgesi, taşan "…"). Kartın alt

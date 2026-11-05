@@ -68,6 +68,7 @@
 
 .sb-bento__izgara {
   --sb-bento-aralik: 12px;
+  --sb-bento-alan-yuk: 56px;
   display: grid;
   grid-template-areas:
     "arama"
@@ -80,18 +81,20 @@
   .sb-bento__izgara {
     --sb-bento-aralik: 18px;
     --sb-bento-bant: 108px;
-    --sb-bento-ust: clamp(420px, calc(100svh - var(--sb-header-yuk, 90px) - 24px - var(--sb-bento-aralik) - var(--sb-bento-bant)), 720px);
+    /* Owner 2026-11-05: ilk ekranı dolduran boyun %15 fazlası (temalar bandı ilk ekranın altına kayar); geniş ekranda
+       üst sınır genişlikle büyür (kenardan kenara slayt çok yassılaşıp afişin başlık bandını kırpmasın). */
+    --sb-bento-ust: calc(1.15 * clamp(420px, calc(100svh - var(--sb-header-yuk, 90px) - 24px - var(--sb-bento-aralik) - var(--sb-bento-bant)), max(720px, 100vw / 2.6)));
     grid-template-rows: minmax(var(--sb-bento-ust), auto) minmax(var(--sb-bento-bant), auto);
   }
 }
 
 /* Arama karesi (owner 2026-10-25): kapak slaytları kareyi doldurur (tur adı ve "tıkla, turu incele" kutusu görselin
-   içinde, her kapakta fotoğrafın en boş yerinde, üst yarıda ve kenarlardan en az %12 içeride; bento-slayt.js 3 sn'de bir çapraz geçişle döndürür; bağlantılı slayt tıklanınca tura gider), tek
-   satır arama çubuğu: < 1024'te fotoğrafın altında, dışında; masaüstünde fotoğrafın alt ortasında (owner 2026-11-02; kapağın serbest
-   alanı, kapaklarda boş bırakıldı). H1 ve "Tur arayın" görünmez. < 1024'te kapak görselin oranında (3:2, kırpılmaz);
-   masaüstünde görsel üst ortadan sabit: kare tam genişlikte olduğundan görselden hep geniş (en geniş oran ~2,5:1,
-   1366×768) ve alttan kırpılır; kapaktaki başlık kartı ve "tıkla" kutusu üst yarıda, hep tam görünür (1024–1920 px'te
-   mevcut kapaklarla ölçüldü, owner 2026-11-02). */
+   içinde; bento-slayt.js 3 sn'de bir çapraz geçişle döndürür; bağlantılı slayt tıklanınca tura gider; Özelleştirici'de
+   12 yuva), tek satır arama çubuğu: < 1024'te fotoğrafın altında, dışında; masaüstünde fotoğrafın alt ortasında
+   (owner 2026-11-02). H1 ve "Tur arayın" görünmez. Slayt görselleri 3:2 afiş (owner 2026-11-05: tam genişlik, kenarda
+   bulanık bant yok). < 1024'te kare 3:2, görsel `contain` ile tam görünür; oranı tutmayan görselde boşluğu aynı görselin
+   bulanık kopyası (zemin) doldurur. Masaüstünde görsel kareyi `cover` ile doldurur, üstten %32 odakla kırpılır: afişin
+   başlık-buton bandı (yükseklikte ~%14–72) görünür, alt bant (logo) kesilir; arama kutusu fotoğrafın alt ortasına biner. */
 .sb-bento__arama {
   --sb-odak-rengi: var(--wp--preset--color--metin);
   position: relative;
@@ -106,11 +109,15 @@
   color: var(--wp--preset--color--metin);
 }
 
+/* Fotoğraf kenardan kenara (owner 2026-11-05): sayfa kabının 12 px kenar boşluğundan ve 1480 px sınırından taşar,
+   köşesi yuvarlak değil. Arama kutusu ve temalar bandı kapta kalır. Blocksy'nin body { overflow-x: hidden }'ı kaydırma
+   çubuğu payı (100vw) yüzünden yatay kaydırma doğmasını önler. */
 .sb-bento__medya {
   position: relative;
   overflow: hidden;
   aspect-ratio: 3 / 2;
-  border-radius: inherit;
+  margin-inline: calc(50% - 50vw);
+  border-radius: 0;
   background: #2b2e34;
 }
 
@@ -218,13 +225,25 @@ html a.sb-bento__slayt:focus-visible::after {
   }
 }
 
-.sb-bento__gorsel {
+.sb-bento__gorsel,
+.sb-bento__zemin {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
+}
+
+/* Ana görsel kutuda ortalanır, kırpılmaz; boşluğu arkadaki bulanık zemin doldurur. Zemin: aynı görsel, kutuyu kaplar;
+   ölçek kenardaki bulanıklık halesini kutunun dışına iter (medya kabı taşanı keser). Perde yok, animasyon yok. */
+.sb-bento__gorsel {
+  object-fit: contain;
+  object-position: 50% 50%;
+}
+
+.sb-bento__zemin {
   object-fit: cover;
-  object-position: 38% 20%;
+  filter: blur(28px) saturate(1.15) brightness(0.92);
+  transform: scale(1.2);
 }
 
 .sb-bento__arama-ic {
@@ -245,7 +264,7 @@ html a.sb-bento__slayt:focus-visible::after {
   align-items: center;
   gap: 6px;
   box-sizing: border-box;
-  height: 56px;
+  height: var(--sb-bento-alan-yuk);
   padding: 6px 6px 6px 44px;
   border: 1px solid var(--wp--preset--color--kenarlik);
   border-radius: 12px;
@@ -453,7 +472,8 @@ html a.sb-bento__slayt:focus-visible::after {
   }
 
   .sb-bento__gorsel {
-    object-position: 50% 0%;
+    object-fit: cover;
+    object-position: 50% 32%;
   }
 
   .sb-bento__arama-ic {

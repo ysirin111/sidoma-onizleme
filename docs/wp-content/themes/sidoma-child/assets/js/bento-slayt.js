@@ -8,8 +8,8 @@
  * (üzerinde, odakta, sekme gizli) geçiş duraklama bitene kadar bekler (odaktaki bağlantı inert olmasın). Arama karesinin üzerine gelinince ya da karede odak varken (CSS) ve
  * sekme gizliyken (is-durgun) dolum durur, sonra kaldığı yerden sürer. Görünen slayt is-aktif, ötekiler inert
  * (bağlantılı slaydın bağlantısı Tab sırasına girmez, tıklanmaz). Hareketi azalt açıkken hiç dönmez, çizgi gizli kalır.
- * JS yoksa ilk slayt görünür, ötekiler ve çizgi gizli. İlk slayttan sonrakilerin görseli ertelenmiş gelir
- * (data-sb-src/srcset): ikincisi sayfa yüklenince, sonrakiler bir önceki görünürken yüklenir.
+ * JS yoksa ilk slayt görünür, ötekiler ve çizgi gizli. İlk slayttan sonrakilerin görselleri (ana görsel ve bulanık zemin)
+ * ertelenmiş gelir (data-sb-src/srcset): ikincisi sayfa yüklenince, sonrakiler bir önceki görünürken, ikisi birlikte yüklenir.
  */
 ( function () {
 	'use strict';
@@ -40,18 +40,18 @@
 		liste[ yeni ].inert = false;
 	}
 
-	// Ertelenmiş slayt görselini yükler (bir kez).
+	// Ertelenmiş slayt görsellerini yükler (bir kez): ana görsel ve bulanık zemin birlikte.
 	function yukle( i ) {
-		var img = slaytlar[ i ] ? slaytlar[ i ].querySelector( 'img[data-sb-src]' ) : null;
-		if ( ! img ) {
-			return;
+		var imgler = slaytlar[ i ] ? slaytlar[ i ].querySelectorAll( 'img[data-sb-src]' ) : [];
+		for ( var k = 0; k < imgler.length; k++ ) {
+			var img = imgler[ k ];
+			if ( img.getAttribute( 'data-sb-srcset' ) ) {
+				img.setAttribute( 'srcset', img.getAttribute( 'data-sb-srcset' ) );
+			}
+			img.setAttribute( 'src', img.getAttribute( 'data-sb-src' ) );
+			img.removeAttribute( 'data-sb-src' );
+			img.removeAttribute( 'data-sb-srcset' );
 		}
-		if ( img.getAttribute( 'data-sb-srcset' ) ) {
-			img.setAttribute( 'srcset', img.getAttribute( 'data-sb-srcset' ) );
-		}
-		img.setAttribute( 'src', img.getAttribute( 'data-sb-src' ) );
-		img.removeAttribute( 'data-sb-src' );
-		img.removeAttribute( 'data-sb-srcset' );
 	}
 
 	// Geçmiş bölmeler dolu, görünenin bölmesi baştan dolmaya başlar, sıradakiler boş.
@@ -96,7 +96,7 @@
 			return;
 		}
 		yukle( yeni );
-		var img = slaytlar[ yeni ].querySelector( 'img' );
+		var img = slaytlar[ yeni ].querySelector( 'img.sb-bento__gorsel' ); // Beklenen ana görsel; bulanık zemin süs.
 		if ( ! img || ( img.complete && img.naturalWidth > 1 ) ) {
 			gec( yeni );
 			return;
