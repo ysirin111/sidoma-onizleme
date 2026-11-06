@@ -169,6 +169,19 @@ def sorgu_anahtari(sorgu):
 	return urllib.parse.urlencode(ciftler)
 
 
+SORGU_SAYFASI = re.compile(r'^/page/(\d+)/?$')
+
+
+def sayfali_sorgu_anahtari(yol, sorgu):
+	"""Sorgulu listenin sayfa numarası (`/page/2/?tur_tipi=paket`) anahtara girer: 1. ve 2. sayfa ayrı dosyaya
+	yazılır. Sorgusuz kök `/page/N` (blog sayfalaması) DISLANAN_YOL'da kalır."""
+	anahtar = sorgu_anahtari(sorgu)
+	eslesme = SORGU_SAYFASI.match(yol)
+	if anahtar and eslesme:
+		anahtar += '&paged=' + eslesme.group(1)
+	return anahtar
+
+
 def sayfa_dosyasi(yol, sorgu):
 	if sorgu:
 		ad = 'sorgu/' + re.sub(r'[^a-z0-9]+', '-', sorgu.lower()).strip('-')
@@ -204,7 +217,7 @@ def yeniden_yaz(metin, sorgu_sayfalari, html_mi):
 		kalan = m.group('kalan') or '/'
 		parca = urllib.parse.urlsplit(html.unescape(kalan))
 		if parca.query and not varlik_mi(parca.path or '/'):
-			anahtar = sorgu_anahtari(parca.query)
+			anahtar = sayfali_sorgu_anahtari(parca.path or '/', parca.query)
 			if anahtar in sorgu_sayfalari:
 				return sorgu_sayfa_yolu(anahtar)
 		return TABAN_YOL + kalan
@@ -262,8 +275,9 @@ def main():
 	# 1. Sayfalar: site haritası + sayfalardaki bağlantılar.
 	while kuyruk:
 		yol, sorgu = kuyruk.popleft()
-		anahtar = sorgu_anahtari(sorgu) if sorgu else ''
-		if anahtar is None or DISLANAN_YOL.search(yol) or (yol, anahtar) in gorulen_sayfa:
+		anahtar = sayfali_sorgu_anahtari(yol, sorgu) if sorgu else ''
+		sorgulu_sayfa = bool(anahtar) and SORGU_SAYFASI.match(yol)
+		if anahtar is None or (DISLANAN_YOL.search(yol) and not sorgulu_sayfa) or (yol, anahtar) in gorulen_sayfa:
 			continue
 		gorulen_sayfa.add((yol, anahtar))
 		adres = KAYNAK + yol + ('?' + anahtar if anahtar else '')
