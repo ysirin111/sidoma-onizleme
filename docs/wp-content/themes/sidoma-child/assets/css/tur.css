@@ -495,20 +495,88 @@ html {
 	display: none;
 }
 
-/* Tarih ve kampanya satırları (canlıdaki gibi fiyatın üstünde): küçük, kalın, satır satır; ≥ 1024 px ortalı. */
+/* Tarih ve kampanya satırları (fiyatın üstünde; ≥ 1024 px ortalı). Kampanya satırı canlıdaki gibi küçük, kalın, kırmızı.
+   Tarihler çip (müşteri 2026-11-07: "basit duruyor"): ince çerçeveli hap, en yakın kalkış kırmızı dolgulu ve "En yakın"
+   etiketli; başlık "TUR ÜCRETİ :" etiketiyle aynı dilde. */
 .sb-tur-secim__tarih-notu {
 	display: grid;
-	gap: 4px;
-	margin: 0 0 12px;
+	gap: 8px;
+	margin: 0 0 14px;
 }
 
 .sb-tur-secim__tarih-notu p {
 	margin: 0;
+	overflow-wrap: anywhere;
+}
+
+.sb-tur-secim__kampanya {
 	color: var(--wp--preset--color--aksan);
 	font-size: 14px;
 	font-weight: 700;
 	line-height: 1.4;
-	overflow-wrap: anywhere;
+}
+
+.sb-tur-secim__tarih-baslik {
+	color: var(--wp--preset--color--metin-ikincil);
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	line-height: 1.3;
+	text-transform: uppercase;
+}
+
+.sb-tur-tarihler {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.sb-tur-tarihler__cip {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	min-height: 36px;
+	padding: 0 14px;
+	border: 1px solid var(--wp--preset--color--kenarlik);
+	border-radius: 999px;
+	background: var(--wp--preset--color--yuzey);
+	color: var(--wp--preset--color--metin);
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1.2;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+
+.sb-tur-tarihler__ek {
+	color: var(--wp--preset--color--metin-ikincil);
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+}
+
+.sb-tur-tarihler__cip--yakin {
+	border-color: var(--wp--preset--color--aksan);
+	background: var(--wp--preset--color--aksan);
+	color: var(--wp--preset--color--aksan-uzeri);
+}
+
+.sb-tur-tarihler__cip--yakin .sb-tur-tarihler__ek {
+	color: inherit;
+}
+
+/* "En yakın": dolgulu çipin içinde ince ayraçla küçük etiket. */
+.sb-tur-tarihler__yakin {
+	padding-left: 8px;
+	border-left: 1px solid currentColor;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	opacity: 0.92;
 }
 
 /* ≥ 1024 px fiyat kartı: ortalı küçük "TUR ÜCRETİ :" etiketi (fiyat satırının etiketi üste alınır), büyük fiyat, alt
@@ -531,6 +599,10 @@ html {
 	.sb-tur-secim__tarih-notu {
 		margin-bottom: 16px;
 		text-align: center;
+	}
+
+	.sb-tur-tarihler {
+		justify-content: center;
 	}
 
 	.sb-tur-secim__etiket {
