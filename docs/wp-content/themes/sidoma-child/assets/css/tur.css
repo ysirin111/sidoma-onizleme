@@ -81,7 +81,8 @@ html {
 	}
 }
 
-/* ---------- Galeri: 16:10 ana görsel, altında yatay küçük görsel şeridi (urun-galeri.js) ---------- */
+/* ---------- Galeri: ana görsel kırpılmadan (kabın oranı kapak görselinin oranı, --sb-kapak-oran; owner 2026-11-10),
+   altında yatay küçük görsel şeridi (urun-galeri.js). Oranı farklı galeri görseli kaba sığdırılır (contain). ---------- */
 .sb-tur-galeri {
 	display: grid;
 	gap: 12px;
@@ -90,7 +91,7 @@ html {
 
 .sb-tur-galeri__sahne {
 	position: relative;
-	aspect-ratio: 16 / 10;
+	aspect-ratio: var(--sb-kapak-oran, 1.6);
 	overflow: hidden;
 	border-radius: var(--sb-kart-radius, 18px);
 	background: var(--wp--preset--color--yuzey-2);
@@ -102,7 +103,7 @@ html {
 	inline-size: 100%;
 	block-size: 100%;
 	margin: 0;
-	object-fit: cover;
+	object-fit: contain;
 }
 
 .sb-tur-galeri__sahne > .sb-bilgi {
@@ -210,19 +211,24 @@ html {
    boşluk kalmaz (sb-tur-galeri--adet-N): 1 tam genişlik, 2 yarı yarıya, 3 sağda iki görsel alt alta, 4 sağda üstte iki,
    altta bir geniş. Oklar yok; görsele tık galeri penceresini açar (urun-galeri.js, --pencereli). */
 @media (min-width: 1024px) {
+	/* Kapak sütunu = mozaik boyu × kapak oranı (kırpılmaz), en çok kabın %66'sı; küçük görseller kalanı paylaşır. */
 	.sb-tur-galeri {
+		--sb-galeri-boy: clamp(340px, 32vw, 460px);
 		position: relative;
-		grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr);
+		grid-template-columns: min(calc(var(--sb-galeri-boy) * var(--sb-kapak-oran, 1.6)), 66%) minmax(0, 1fr) minmax(0, 1fr);
 		grid-template-rows: repeat(2, minmax(0, 1fr));
 		gap: 8px;
-		block-size: clamp(340px, 32vw, 460px);
+		block-size: var(--sb-galeri-boy);
 		overflow: hidden;
 		border-radius: var(--sb-kart-radius, 18px);
 	}
 
+	/* Tek görsel: kap görselin genişliğine iner, ortalanır (köşeler ve "Tüm Fotoğraflar" görselin üstünde kalır). */
 	.sb-tur-galeri--adet-0,
 	.sb-tur-galeri--adet-1 {
 		grid-template-columns: minmax(0, 1fr);
+		justify-self: center;
+		inline-size: min(calc(var(--sb-galeri-boy) * var(--sb-kapak-oran, 1.6)), 100%);
 	}
 
 	.sb-tur-galeri__sahne {
