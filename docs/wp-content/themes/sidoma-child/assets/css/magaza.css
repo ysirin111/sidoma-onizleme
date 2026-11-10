@@ -552,36 +552,6 @@ ul.products li.sb-tur-oge {
 	color: var(--wp--preset--color--metin-ikincil);
 }
 
-.sb-tur-kart__cipler {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 6px;
-	margin: 10px 0 0;
-	padding: 0;
-	list-style: none;
-}
-
-.sb-tur-kart__cipler li {
-	display: inline-flex;
-	align-items: center;
-	gap: 4px;
-	max-width: 100%;
-	margin: 0;
-	padding: 4px 9px;
-	border-radius: 8px;
-	font-size: 12px;
-	font-weight: 600;
-	line-height: 1.3;
-	color: var(--sb-kart-yesil);
-	background: var(--sb-kart-yesil-acik);
-}
-
-.sb-tur-kart__cipler li > span {
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-}
-
 .sb-tur-kart--izgara .sb-tur-kart__alt {
 	flex-wrap: wrap;
 	align-items: flex-end;
