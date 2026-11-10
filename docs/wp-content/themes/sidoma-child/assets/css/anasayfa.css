@@ -475,9 +475,19 @@ html a.sb-bento__slayt:focus-visible::after {
     aspect-ratio: auto;
   }
 
+  /* Afiş başlığı tavana yapışmasın (owner 2026-11-10): görsel 36 px aşağı kayar (altı kırpılır, arama kutusunun
+     arkası), üstte açılan bandı arkadaki zemin doldurur, görselin üst kenarı ona yumuşak geçer (geçiş 56 px, yavaş başlar yavaş biter; son %10'u afiş başlığının üstüne yeni değer, fark edilmez); odak üst kenarda, afişin üstü kırpılmaz. */
   .sb-bento__gorsel {
+    top: 36px;
     object-fit: cover;
-    object-position: 50% 32%;
+    object-position: 50% 0%;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, rgba(0, 0, 0, 0.05) 6px, rgba(0, 0, 0, 0.16) 12px, rgba(0, 0, 0, 0.34) 19px, rgba(0, 0, 0, 0.56) 26px, rgba(0, 0, 0, 0.76) 33px, rgba(0, 0, 0, 0.9) 40px, rgba(0, 0, 0, 0.97) 48px, #000 56px);
+    mask-image: linear-gradient(to bottom, transparent 0, rgba(0, 0, 0, 0.05) 6px, rgba(0, 0, 0, 0.16) 12px, rgba(0, 0, 0, 0.34) 19px, rgba(0, 0, 0, 0.56) 26px, rgba(0, 0, 0, 0.76) 33px, rgba(0, 0, 0, 0.9) 40px, rgba(0, 0, 0, 0.97) 48px, #000 56px);
+  }
+
+  /* Masaüstünde zemin karartılmaz: üst bantta görselle aynı tonda kalsın, geçiş çizgisi seçilmesin. */
+  .sb-bento__zemin {
+    filter: blur(28px);
   }
 
   .sb-bento__arama-ic {
